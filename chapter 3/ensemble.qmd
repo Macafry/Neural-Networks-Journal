@@ -1,0 +1,149 @@
+---
+includes:
+  in-header: ../metadata.yaml
+---
+
+
+# Ensemble Methods
+
+So far we've looked at a number of different machine learning algorithms. The one thing all these algorithms have in common is that they are all **Strong learners**. A strong learner is a model that is able to reach an arbitrary level of precision given enough resources and data. In contrast, a **weak learner** is a model that is just slightly better than random guessing. For example, a weak learner might be able to correctly classify 55% of the time, while a strong learner might be able to correctly classify 95% of the time. The basic idea behind ensemble methods is to combine multiple weak learners into a single strong learner. 
+
+This paradigm is akin to asking a crowd of people to guess the number of jelly beans in a jar, then taking the average as our final answer. The hope is that the average of the guesses will be more accurate than any single guess. I first saw this in a video, but was unable to find it again.
+
+This section assumes the reader is familiar with decision trees as most ensemble methods are based on decision trees. If you are unfamiliar with decision trees, I recommend reading the [Decision Trees section](./CART.html).
+
+## Bootstrap Resampling
+
+Before we discuss any ensemble methods, we need to devise a way for us to train several **independent** models. One way to do this is to use **bootstrap resampling**. The idea behind bootstrap resampling is to take a random sample of the data **with replacement**, then train a model on that sample. We can repeat this process multiple times to get multiple models. 
+
+The following is a toy example of a single bootstrap resampling process:
+
+![](figures/bootstrap.png){fig-align="center" width="80%"}
+
+Note each resample only keeps $1-e^{-1}\approx 63.21%$ of the data. However, the power of bootstrap comes in the several resamples being done. With $k$ resamples, we keep $1-e^{-k}\times 100%$ of the data. Just $k=5$ will keep $99.33%$ of the data, so as long as we use enough models, this shouln't be an issue. However, this does show that it is very risky to have several layers of bootstrapping, as we will be keeping an even smaller fraction of the data.
+
+#### Weighted Bootstrap
+
+In some cases, we may want to give more weight to some of the observations. For this, we can augment our data with weights proportional to the number of times each observation is included in the resample. This is called a **weighted bootstrap**.
+
+The following is a toy example of a single weighted bootstrap resampling process. Observe how the observations with higher weights are more likely to be included in the resample.
+
+![](figures/weighted-bootstrap.png){fig-align="center" width="80%"}
+
+## Bagging
+
+**Bagging** stands for **B**ootstap **Agg**regat**ing**. The key idea of bagging is to train several models in parallel using different bootstrap resamples of the data. Then, we combine the predictions of the models to make the final prediction. This could be averaging the predictions for regression problems, or majority voting for classification problems. It is possible to use different types of models for bagging, however, bagging models are typically homogeneous. The most popular bagging algorithm is **random forests**, which is when the base models are decision trees. 
+
+The following diagram shows a bagging process with 3 base models: KNN, SVM, and decision tree.
+
+![](figures/bagging-1.png){fig-align="center" width="60%"}
+
+#### Voting
+**Voting** is a variant of bagging, however, unlike bagging, the base models are all trained on the original dataset. It is not a good idea to use voting when bagging is available, but might be useful if the models are already trained. The following diagram shows a voting process with 3 base models: KNN, SVM, and decision tree.
+
+![](figures/voting-1.png){fig-align="center" width="60%"}
+
+## Boosting
+
+**Boosting** is a sequential ensemble method where each model is trained to correct the errors of the previous model. The first model is trained on the original data, and the second model is trained on the data where the errors of the first model are emphasized via weighted bootstrapping. This process continues until a stopping criterion is met. The final prediction is made by combining the predictions of all the models using a weighted sum. The weights are determined by the performance of each model on the training data.
+
+### AdaBoost
+
+**AdaBoost** is a popular boosting algorithm that uses decision trees as base models. The algorithm works by training a series of decision trees on the training data, where each tree is trained to correct the errors of the previous tree. The final prediction is made by combining the predictions of all the trees using a weighted sum. The weights are determined by the performance of each tree on the training data. An overview of the AdaBoost algorithm is shown below:
+
+1. Augment the dataset to have sample weights with initial weights set as $\frac{1}{N}$.
+2. Fit a weak learner, $M_i$, using a weighted bootstrap.
+3. Obtain the predictions on the original/full dataset.
+4. Calculate $E$, the weighted error:
+    $$
+    E = 1 - \text{Weighted Accuracy}
+    $$
+5. Compute the importance of the model:
+    $$
+    \lambda_i = \frac{1}{2} \log \left( \frac{1 - E}{E} \right)
+    $$
+6. Rescale the sample weights by:
+
+    - $e^{\lambda_i}$ if incorrectly classified 
+    - $e^{-\lambda_i}$ if correctly classified 
+
+
+7. Normalize the weights such that the sum equals 1.
+8. Repeat Steps 2-7 until a stopping condition is met.
+
+In the end the ensemble prediction is given by:
+$$
+M_\text{Final}(x) = \sum_{i=1}^N \lambda_i M_i(x)
+$$
+
+The following graph shows why importance has that formula - it gives high positive imporance to models that have a low error rate, a 0 importance to models that are 50/50, and a high negative importance to models that have a high error rate (take the opposite prediction). While this formula focuses only on the 2-class case, it is enough for us to understand the intuition behind it.
+
+![](figures/boosting-1.png){fig-align="center" width="60%"}
+
+The following image shows how two weak learners are combined to form a strong learner:
+
+![](figures/boosting-2.png){fig-align="center" width="60%"}
+
+### Gradient Boosting
+
+**Gradient Boosting** is a type of boosting algorithm that uses gradient descent to minimize the loss function. However, unlike gradient decent for neural networks, where the weights get updated to minimize the loss function, it adds a model to the ensemble in each iteration. The model is added to the ensemble in such a way that it minimizes the loss function. An overview of the Gradient Boosting algorithm is shown below:
+
+1. Start by fitting a not-so-weak learner to the dataset, denoted as $M_1$.
+2. Compute a differentiable loss function, $\mathcal{L}(y, M_i(x))$.
+3. Calculate the residuals:
+    $$
+    \hat{r}_{in} = \frac{\partial \mathcal{L}(y_n, M_i(x_n))}{\partial M_i(x_n)}
+    $$
+4. Fit a new learner with $x$ as the features and $\hat{r}_{in}$ as the labels, denoted as $m_{i+1}$.
+5. Determine the step size (learning rate), $\hat{\gamma}_{i+1}$:
+    $$
+    \hat{\gamma}_{i+1} = \arg \min_\gamma \mathcal{L}\left(y, M_i(x) - \gamma m_{i+1}(x)\right)
+    $$
+
+    - **Note:** This is also called the learning rate. Some suggest setting $\gamma$ to a fixed small value (e.g., $0.001$) for all $i$.
+6. Update the model:
+    $$
+    M_{i+1}(x) = M_i(x) - \hat{\gamma}_{i+1} m_{i+1}(x)
+    $$
+7. Repeat Steps 2-6 until a stopping condition is met.
+
+The last model, $M_T$, is the final model.
+
+The following image illustrates the Gradient Boosting algorithm:
+
+![](figures/boosting-3.png){fig-align="center" width="60%"}
+
+Gradient boosting is most useful when the base learner doens't have a clear differentiable parameters such as decision trees.
+
+#### XGBoost
+
+**XGBoost** (eXtreme Gradient Boosting) is a variant of Gradient Boosting that uses a heuristic approaches to optimize the loss function and improve computational efficiency. It also introduces regularization terms to prevent overfitting. It is a controversial algorithm, so it will only be mentioned briefly here.
+
+## Stacking
+
+**Stacking** is a technique that logically combines independently trained models to improve performance. It is a meta-algorithm that can be used with any combination of base models. 
+
+I had trouble trainig a good CNN that predicts the label of the [CIFAR-10 dataset](https://www.cs.toronto.edu/~kriz/cifar.html). My model got confused between cats and dogs a little bit too often. As such I propose a stacking model as shown below:
+
+![](figures/stacking-1.png){fig-align="center" width="80%"}
+
+The key idea is to generate metaclasses that combine similar classes:
+ - Cats and dogs
+ - Other animals
+ - Vehicles
+
+Then I trained a models that predict the metaclasses, a model for each of the metaclasses that predicts the label or if the image is in the incorrect metaclass, and a final catch-all model that predicts the label if the image is in the incorrect metaclass.
+
+#### Cascading
+
+**Cascading** is a variant of stacking, where each model is applied sequentially to the data. Unlike the previous example, there's no split paths. The following image shows how cascading can be used to tackle the classification of the CIFAR-10 dataset:
+
+![](figures/stacking-2.png){fig-align="center" width="80%"}
+
+Now each model acts as a one vs all model. The first model predicts if the label should be "dog", the second model predicts if the label should be "cat", and so on. As such it is important to train a model with recall and specificity in mind.
+
+## Not PyTorch
+
+#### Bagging
+
+#### Stacking

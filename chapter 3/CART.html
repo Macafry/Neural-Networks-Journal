@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>cart</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="CART_files/libs/clipboard/clipboard.min.js"></script>
+<script src="CART_files/libs/quarto-html/quarto.js"></script>
+<script src="CART_files/libs/quarto-html/popper.min.js"></script>
+<script src="CART_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="CART_files/libs/quarto-html/anchor.min.js"></script>
+<link href="CART_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="CART_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="CART_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="CART_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="CART_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Decision Trees</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="definition" class="level2">
+<h2 class="anchored" data-anchor-id="definition">Definition</h2>
+<p>Decision trees are a collection of yes/no questions organized in a tree structure for classification. Each yes/no question is called a node. By convention: - <strong>YES</strong> leads to the left child. - <strong>NO</strong> leads to the right child.</p>
+<p>At each node, the dataset is split into two subsets, and the process recurses as shown in the figure below.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/decision-tree.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<p>Decision trees can be used for regression and classification, hence, some people call them <strong>Classification And Regression Trees</strong> (CART).</p>
+</section>
+<section id="how-to-fit-a-decision-tree" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-fit-a-decision-tree">How to Fit a Decision Tree</h2>
+<p>Each node has a greedy target: <strong>Minimize the impurity of both child nodes</strong>, in other words to lower the <strong>diversity</strong> of each node. This can be achieved by:</p>
+<ul>
+<li>Reducing the number of unique classes of each child node.</li>
+<li>Making the distribution of classes less even.</li>
+</ul>
+<p>A <strong>pure node</strong> is such nodes that contains observations of a single class, signaling the end of recursion. The following image shows different levels of impurity</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/decision-tree-impurity.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%"></p>
+</figure>
+</div>
+<section id="measuring-impurity" class="level3">
+<h3 class="anchored" data-anchor-id="measuring-impurity">Measuring Impurity</h3>
+<section id="gini-index" class="level4">
+<h4 class="anchored" data-anchor-id="gini-index">Gini Index</h4>
+<p>The Gini index measures node impurity by evaluating the probability of incorrect classification. Mathematically, it is the probability that two randomly selected observations from the node belong to different classes. Note: <span class="math inline">\(P(different) = 1 - P(same)\)</span></p>
+<p>Observe that if <span class="math inline">\(p\)</span> is the vector containing the class proportions for a node, then <span class="math inline">\(p\,p^T\)</span> gives computes a matrix representing the entire sample space of class combinations.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/decision-tree-gini.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%"></p>
+</figure>
+</div>
+<p>We can observe that <span class="math inline">\(P(same) = \operatorname{trace}(p\,p^T) = p \cdot p\)</span>. Thus, the Gini index can be written as:</p>
+<p><span class="math display">\[
+\text{Gini Index}(p) = P(different) = 1- P(same) = 1 - p \cdot p = 1 - \sum_{i=1}^k p_i^2
+\]</span></p>
+<p>While the dot product is sufficient to express the Gini index, it most comonly found using the sum notation at the end of the expresion</p>
+</section>
+<section id="entropy" class="level4">
+<h4 class="anchored" data-anchor-id="entropy">Entropy</h4>
+<p>Entropy is also used to measure diversity in the context of biology and ecolofy, often referred to as the <strong>Shannon Diversity Index</strong>. It was originally derived for information theory where by using <span class="math inline">\(\log_2\)</span> it represents the expected number of questions needed to reach a pure node. In practice, for decicion trees, entropy is normalized to [0,1] using <span class="math inline">\(\log_k\)</span> for interpretability and comparability with the Gini index.</p>
+<p>However, <strong>Information Gain</strong> is preferred over entropy in practical applications. Both the GINI Index and Entropy give us absolute measures, but in the context of decision trees, we have a previous state we’d like to compare against. Information gain is a relative measure that achieves this. Information Gain is analogous to “Lost Surprise”. Since Entropy is also analogous to surprise, the formula is as follows:</p>
+<p><span class="math display">\[
+\operatorname{Information Gain} = H(Parent Node) - dfrac{1}{2} \left( H(Left Child) + H(Right Child) \right)
+\]</span></p>
+</section>
+</section>
+<section id="evaluating-questions-for-nodes" class="level3">
+<h3 class="anchored" data-anchor-id="evaluating-questions-for-nodes">Evaluating Questions for Nodes</h3>
+<p>To select the best question, we first need to consider which questions to ask. This changes between continuous and categorical variables. Once we have a list of questions, we can evaluate them using the above formula. And select the question that maximizes information gain or minimizes the gini coefficient.</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Height</th>
+<th>Weight</th>
+<th>Gender</th>
+<th>School Year</th>
+<th>Likes Pokemon?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>165</td>
+<td>55</td>
+<td>Female</td>
+<td>Sophomore</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>178</td>
+<td>72</td>
+<td>Male</td>
+<td>Junior</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>160</td>
+<td>50</td>
+<td>Female</td>
+<td>Freshman</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>172</td>
+<td>65</td>
+<td>Male</td>
+<td>Senior</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>155</td>
+<td>48</td>
+<td>Female</td>
+<td>Sophomore</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>168</td>
+<td>60</td>
+<td>Male</td>
+<td>Freshman</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<section id="for-continuous-variables" class="level4">
+<h4 class="anchored" data-anchor-id="for-continuous-variables">For Continuous Variables</h4>
+<p>To identify the best question for continuous variables, we need to consider smart cut-off points. To avoid asking redundant questions, the following steps can be used: 1. Sort the data. 2. Evaluate potential questions at in-between values (or percentiles for larger datasets). 3. Measure the “goodness” of each question. 4. Choose the best one.</p>
+<section id="example-with-heights" class="level6">
+<h6 class="anchored" data-anchor-id="example-with-heights">Example with heights:</h6>
+<div class="columns" data-align="center">
+<div class="column" style="width:40%;">
+<p><strong>Sorted Data:</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Height</th>
+<th>Likes Pokemon?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>155</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>160</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>165</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>168</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>172</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>178</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+</div><div class="column" style="width:10%;">
+
+</div><div class="column" data-align="bottom" style="width:30%;">
+<p><br><br><br><br> <strong>Questions:</strong></p>
+<ul>
+<li>Q1: Height ≤ 157.5?</li>
+<li>Q2: Height ≤ 162.5?</li>
+<li>Q3: Height ≤ 166.5?</li>
+<li>Q4: Height ≤ 170.0?</li>
+<li>Q5: Height ≤ 175.0?</li>
+</ul>
+</div>
+</div>
+<p>Then, we’d compute the relevant metric for each of the questions and choose the best one.</p>
+</section>
+</section>
+<section id="for-categorical-variables" class="level4">
+<h4 class="anchored" data-anchor-id="for-categorical-variables">For Categorical Variables</h4>
+<p>For categorical variables, it is a little bit easier. We can just ask if the value is in a certain category or not. Then we measure how good each question is and choose the best one.</p>
+<section id="example-with-school-year" class="level6">
+<h6 class="anchored" data-anchor-id="example-with-school-year">Example with School Year</h6>
+<div class="columns" data-align="center">
+<div class="column" style="width:40%;">
+<p><strong>Sorted Data:</strong></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>School Year</th>
+<th>Likes Pokemon?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sophomore</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Junior</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Freshman</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Senior</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Sophomore</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Freshman</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+</div><div class="column" style="width:10%;">
+
+</div><div class="column" data-align="bottom" style="width:30%;">
+<p><br><br><br><br> <strong>Questions:</strong></p>
+<ul>
+<li>Q1: Is Sophomore?</li>
+<li>Q2: Is Junior?</li>
+<li>Q3: Is Freshman?</li>
+<li>Q4: Is Senior?</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+</section>
+</section>
+<section id="recursive-fitting-of-a-decision-tree." class="level2">
+<h2 class="anchored" data-anchor-id="recursive-fitting-of-a-decision-tree.">Recursive Fitting of a decision tree.</h2>
+<p>Now that we understand all the components needed to fit a decision tree, let’s see how we can fit a decision tree recursively:</p>
+<ol type="1">
+<li>Indentify the best question for each variable.</li>
+<li>Indentify the best question among all variables.</li>
+<li>Use that question to split the data into child nodes.</li>
+<li>Recursively apply the process to child nodes.</li>
+<li>Stop when the data is pure or the tree is too deep*.</li>
+</ol>
+</section>
+<section id="prediction-using-a-tree" class="level2">
+<h2 class="anchored" data-anchor-id="prediction-using-a-tree">Prediction Using a Tree</h2>
+<p>To make predictions, traverse the tree by answering the yes/no questions until reaching a leaf node. Then, if we’re classifying use the majority class of the leaf node, if we’re regression use the mean of the leaf node.</p>
+<section id="impurity-for-regression" class="level4">
+<h4 class="anchored" data-anchor-id="impurity-for-regression">Impurity for regression</h4>
+<p>While we discussed impurity before, it was focused on clasiffication. For regression, we use the variance of the target variable for that specific node.</p>
+</section>
+</section>
+<section id="pros-and-cons-of-decision-trees" class="level2">
+<h2 class="anchored" data-anchor-id="pros-and-cons-of-decision-trees">Pros and Cons of Decision Trees</h2>
+<section id="pros" class="level3">
+<h3 class="anchored" data-anchor-id="pros">Pros</h3>
+<ul>
+<li>Computationally efficient.</li>
+<li>Highly interpretable.</li>
+<li>Captures non-linear relationships.</li>
+<li>Automatically detects feature importance.</li>
+<li>Fast training and prediction.</li>
+<li>Handles both numerical and categorical data.</li>
+</ul>
+</section>
+<section id="cons" class="level3">
+<h3 class="anchored" data-anchor-id="cons">Cons</h3>
+<ul>
+<li>Prone to overfitting.</li>
+<li>Sensitive to data variability.</li>
+<li>Biased toward dominant features.</li>
+<li>Greedy algorithm arrow Less accurate on test sets.</li>
+</ul>
+</section>
+</section>
+<section id="overcoming-overfitting" class="level2">
+<h2 class="anchored" data-anchor-id="overcoming-overfitting">Overcoming Overfitting</h2>
+<p>Regularization parameters include: - <strong>Max depth</strong>: Limit the tree’s depth. - <strong>Min samples split</strong>: Minimum number of samples to split a node. - <strong>Min samples leaf</strong>: Minimum samples in a leaf node. - <strong>Min impurity decrease</strong>: Minimum decrease in impurity to split further. - <strong>Pruning</strong>: Remove leaf nodes that minimally reduce impurity.</p>
+</section>
+<section id="addressing-limitations-with-ensembles" class="level2">
+<h2 class="anchored" data-anchor-id="addressing-limitations-with-ensembles">Addressing Limitations with Ensembles</h2>
+<p>Ensemble models enhance decision tree performance: - <strong>Random Forest</strong> - <strong>AdaBoost</strong> - <strong>GradientBoost</strong> - <strong>XGBoost</strong></p>
+<p>While algorithms like AdaBoost and GradientBoost are general ensemble methods, they are widely associated with tree-based models.</p>
+</section>
+<section id="not-pytorch" class="level2">
+<h2 class="anchored" data-anchor-id="not-pytorch">Not PyTorch</h2>
+<p>The SciKit-Learn library in Python provides a comprehensive implementation of decision trees. For this showcase we’ll fit a classification tree to the breast cancer dataset.</p>
+<div id="517f4501" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Libraries and data</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_breast_cancer</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeClassifier, plot_tree, export_graphviz</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score, confusion_matrix, ConfusionMatrixDisplay</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the Iris dataset</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>breast_cancer <span class="op">=</span> load_breast_cancer()</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> breast_cancer.data</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> breast_cancer.target</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We can fit the model using the following code:</p>
+<div id="99fdd6bc" class="cell" data-results="hide" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>decision_tree <span class="op">=</span> DecisionTreeClassifier()</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>decision_tree.fit(X_train, y_train)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Fortunately, the SciKit-Learn library handles most of the details for us. We can visualize the tree using the <code>plot_tree</code> function:</p>
+<div id="3d5200f0" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>plot_tree(decision_tree, filled<span class="op">=</span><span class="va">True</span>, feature_names<span class="op">=</span>breast_cancer.feature_names)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="CART_files/figure-html/cell-4-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="540" height="389"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Blue nodes represent observations that are classified as benign, while orange nodes represent observations that are classified as malignant. The more intense a node is colored, the purer it is. However, the tree is so large that it is difficult to interpret. It is also very likely that it is overfit. So,let’s take a look at the train and test accuracies:</p>
+<div id="a87603fe" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Train and test accuracy</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>train_accuracy <span class="op">=</span> accuracy_score(y_train, decision_tree.predict(X_train))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>test_accuracy <span class="op">=</span> accuracy_score(y_test, decision_tree.predict(X_test))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Train accuracy: </span><span class="sc">{</span>train_accuracy<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test accuracy: </span><span class="sc">{</span>test_accuracy<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train accuracy: 1.0000
+Test accuracy: 0.9123</code></pre>
+</div>
+</div>
+<p>Yup, the train accuracy is 100% and the test accuracy is 91%. This is a classic example of overfitting. Let’s fit another tree with some regularization parameters and analyze the results.</p>
+<div id="4c383fb6" class="cell" data-results="hide" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dt2 <span class="op">=</span> DecisionTreeClassifier(min_samples_leaf<span class="op">=</span><span class="dv">4</span>, min_samples_split<span class="op">=</span><span class="dv">10</span>, max_depth<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>dt2.fit(X_train, y_train)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="2a51c048" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Tree plot and accuracy</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plot_tree(dt2, filled<span class="op">=</span><span class="va">True</span>, feature_names<span class="op">=</span>breast_cancer.feature_names)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>train_accuracy <span class="op">=</span> accuracy_score(y_train, dt2.predict(X_train))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>test_accuracy <span class="op">=</span> accuracy_score(y_test, dt2.predict(X_test))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Train accuracy: </span><span class="sc">{</span>train_accuracy<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test accuracy: </span><span class="sc">{</span>test_accuracy<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="CART_files/figure-html/cell-7-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="540" height="389"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train accuracy: 0.9780
+Test accuracy: 0.9649</code></pre>
+</div>
+</div>
+<p>The Train accuracy decreases to 97%, but the test accuracy jumps all the way to 96%. This is a good example of how regularization can help prevent overfitting.</p>
+<p>However, I must admit I originally didn’t set any seeds, which gave varying results each time I ran the code (mostly due to the train/test split). Different seeds gave widely different results, which is not ideal. The test accuracies in both cases ranged between 88%-95%, showing that trees are very sensitive to changes in the data.</p>
+<hr>
+<p>This is a high-level summary of decision trees, offering insights into their structure, fitting process, and how to improve their performance using regularization and ensemble methods.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

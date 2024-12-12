@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>ensemble</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="ensemble_files/libs/clipboard/clipboard.min.js"></script>
+<script src="ensemble_files/libs/quarto-html/quarto.js"></script>
+<script src="ensemble_files/libs/quarto-html/popper.min.js"></script>
+<script src="ensemble_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="ensemble_files/libs/quarto-html/anchor.min.js"></script>
+<link href="ensemble_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="ensemble_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="ensemble_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="ensemble_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="ensemble_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="ensemble-methods" class="level1">
+<h1>Ensemble Methods</h1>
+<p>So far we’ve looked at a number of different machine learning algorithms. The one thing all these algorithms have in common is that they are all <strong>Strong learners</strong>. A strong learner is a model that is able to reach an arbitrary level of precision given enough resources and data. In contrast, a <strong>weak learner</strong> is a model that is just slightly better than random guessing. For example, a weak learner might be able to correctly classify 55% of the time, while a strong learner might be able to correctly classify 95% of the time. The basic idea behind ensemble methods is to combine multiple weak learners into a single strong learner.</p>
+<p>This paradigm is akin to asking a crowd of people to guess the number of jelly beans in a jar, then taking the average as our final answer. The hope is that the average of the guesses will be more accurate than any single guess. I first saw this in a video, but was unable to find it again.</p>
+<p>This section assumes the reader is familiar with decision trees as most ensemble methods are based on decision trees. If you are unfamiliar with decision trees, I recommend reading the <a href="./CART.html">Decision Trees section</a>.</p>
+<section id="bootstrap-resampling" class="level2">
+<h2 class="anchored" data-anchor-id="bootstrap-resampling">Bootstrap Resampling</h2>
+<p>Before we discuss any ensemble methods, we need to devise a way for us to train several <strong>independent</strong> models. One way to do this is to use <strong>bootstrap resampling</strong>. The idea behind bootstrap resampling is to take a random sample of the data <strong>with replacement</strong>, then train a model on that sample. We can repeat this process multiple times to get multiple models.</p>
+<p>The following is a toy example of a single bootstrap resampling process:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/bootstrap.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+<p>Note each resample only keeps <span class="math inline">\(1-e^{-1}\approx 63.21%\)</span> of the data. However, the power of bootstrap comes in the several resamples being done. With <span class="math inline">\(k\)</span> resamples, we keep <span class="math inline">\(1-e^{-k}\times 100%\)</span> of the data. Just <span class="math inline">\(k=5\)</span> will keep <span class="math inline">\(99.33%\)</span> of the data, so as long as we use enough models, this shouln’t be an issue. However, this does show that it is very risky to have several layers of bootstrapping, as we will be keeping an even smaller fraction of the data.</p>
+<section id="weighted-bootstrap" class="level4">
+<h4 class="anchored" data-anchor-id="weighted-bootstrap">Weighted Bootstrap</h4>
+<p>In some cases, we may want to give more weight to some of the observations. For this, we can augment our data with weights proportional to the number of times each observation is included in the resample. This is called a <strong>weighted bootstrap</strong>.</p>
+<p>The following is a toy example of a single weighted bootstrap resampling process. Observe how the observations with higher weights are more likely to be included in the resample.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/weighted-bootstrap.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="bagging" class="level2">
+<h2 class="anchored" data-anchor-id="bagging">Bagging</h2>
+<p><strong>Bagging</strong> stands for <strong>B</strong>ootstap <strong>Agg</strong>regat<strong>ing</strong>. The key idea of bagging is to train several models in parallel using different bootstrap resamples of the data. Then, we combine the predictions of the models to make the final prediction. This could be averaging the predictions for regression problems, or majority voting for classification problems. It is possible to use different types of models for bagging, however, bagging models are typically homogeneous. The most popular bagging algorithm is <strong>random forests</strong>, which is when the base models are decision trees.</p>
+<p>The following diagram shows a bagging process with 3 base models: KNN, SVM, and decision tree.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/bagging-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></p>
+</figure>
+</div>
+<section id="voting" class="level4">
+<h4 class="anchored" data-anchor-id="voting">Voting</h4>
+<p><strong>Voting</strong> is a variant of bagging, however, unlike bagging, the base models are all trained on the original dataset. It is not a good idea to use voting when bagging is available, but might be useful if the models are already trained. The following diagram shows a voting process with 3 base models: KNN, SVM, and decision tree.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/voting-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="boosting" class="level2">
+<h2 class="anchored" data-anchor-id="boosting">Boosting</h2>
+<p><strong>Boosting</strong> is a sequential ensemble method where each model is trained to correct the errors of the previous model. The first model is trained on the original data, and the second model is trained on the data where the errors of the first model are emphasized via weighted bootstrapping. This process continues until a stopping criterion is met. The final prediction is made by combining the predictions of all the models using a weighted sum. The weights are determined by the performance of each model on the training data.</p>
+<section id="adaboost" class="level3">
+<h3 class="anchored" data-anchor-id="adaboost">AdaBoost</h3>
+<p><strong>AdaBoost</strong> is a popular boosting algorithm that uses decision trees as base models. The algorithm works by training a series of decision trees on the training data, where each tree is trained to correct the errors of the previous tree. The final prediction is made by combining the predictions of all the trees using a weighted sum. The weights are determined by the performance of each tree on the training data. An overview of the AdaBoost algorithm is shown below:</p>
+<ol type="1">
+<li><p>Augment the dataset to have sample weights with initial weights set as <span class="math inline">\(\frac{1}{N}\)</span>.</p></li>
+<li><p>Fit a weak learner, <span class="math inline">\(M_i\)</span>, using a weighted bootstrap.</p></li>
+<li><p>Obtain the predictions on the original/full dataset.</p></li>
+<li><p>Calculate <span class="math inline">\(E\)</span>, the weighted error: <span class="math display">\[
+E = 1 - \text{Weighted Accuracy}
+\]</span></p></li>
+<li><p>Compute the importance of the model: <span class="math display">\[
+\lambda_i = \frac{1}{2} \log \left( \frac{1 - E}{E} \right)
+\]</span></p></li>
+<li><p>Rescale the sample weights by:</p>
+<ul>
+<li><span class="math inline">\(e^{\lambda_i}\)</span> if incorrectly classified</li>
+<li><span class="math inline">\(e^{-\lambda_i}\)</span> if correctly classified</li>
+</ul></li>
+<li><p>Normalize the weights such that the sum equals 1.</p></li>
+<li><p>Repeat Steps 2-7 until a stopping condition is met.</p></li>
+</ol>
+<p>In the end the ensemble prediction is given by: <span class="math display">\[
+M_\text{Final}(x) = \sum_{i=1}^N \lambda_i M_i(x)
+\]</span></p>
+<p>The following graph shows why importance has that formula - it gives high positive imporance to models that have a low error rate, a 0 importance to models that are 50/50, and a high negative importance to models that have a high error rate (take the opposite prediction). While this formula focuses only on the 2-class case, it is enough for us to understand the intuition behind it.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/boosting-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></p>
+</figure>
+</div>
+<p>The following image shows how two weak learners are combined to form a strong learner:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/boosting-2.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></p>
+</figure>
+</div>
+</section>
+<section id="gradient-boosting" class="level3">
+<h3 class="anchored" data-anchor-id="gradient-boosting">Gradient Boosting</h3>
+<p><strong>Gradient Boosting</strong> is a type of boosting algorithm that uses gradient descent to minimize the loss function. However, unlike gradient decent for neural networks, where the weights get updated to minimize the loss function, it adds a model to the ensemble in each iteration. The model is added to the ensemble in such a way that it minimizes the loss function. An overview of the Gradient Boosting algorithm is shown below:</p>
+<ol type="1">
+<li><p>Start by fitting a not-so-weak learner to the dataset, denoted as <span class="math inline">\(M_1\)</span>.</p></li>
+<li><p>Compute a differentiable loss function, <span class="math inline">\(\mathcal{L}(y, M_i(x))\)</span>.</p></li>
+<li><p>Calculate the residuals: <span class="math display">\[
+\hat{r}_{in} = \frac{\partial \mathcal{L}(y_n, M_i(x_n))}{\partial M_i(x_n)}
+\]</span></p></li>
+<li><p>Fit a new learner with <span class="math inline">\(x\)</span> as the features and <span class="math inline">\(\hat{r}_{in}\)</span> as the labels, denoted as <span class="math inline">\(m_{i+1}\)</span>.</p></li>
+<li><p>Determine the step size (learning rate), <span class="math inline">\(\hat{\gamma}_{i+1}\)</span>: <span class="math display">\[
+\hat{\gamma}_{i+1} = \arg \min_\gamma \mathcal{L}\left(y, M_i(x) - \gamma m_{i+1}(x)\right)
+\]</span></p>
+<ul>
+<li><strong>Note:</strong> This is also called the learning rate. Some suggest setting <span class="math inline">\(\gamma\)</span> to a fixed small value (e.g., <span class="math inline">\(0.001\)</span>) for all <span class="math inline">\(i\)</span>.</li>
+</ul></li>
+<li><p>Update the model: <span class="math display">\[
+M_{i+1}(x) = M_i(x) - \hat{\gamma}_{i+1} m_{i+1}(x)
+\]</span></p></li>
+<li><p>Repeat Steps 2-6 until a stopping condition is met.</p></li>
+</ol>
+<p>The last model, <span class="math inline">\(M_T\)</span>, is the final model.</p>
+<p>The following image illustrates the Gradient Boosting algorithm:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/boosting-3.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></p>
+</figure>
+</div>
+<p>Gradient boosting is most useful when the base learner doens’t have a clear differentiable parameters such as decision trees.</p>
+<section id="xgboost" class="level4">
+<h4 class="anchored" data-anchor-id="xgboost">XGBoost</h4>
+<p><strong>XGBoost</strong> (eXtreme Gradient Boosting) is a variant of Gradient Boosting that uses a heuristic approaches to optimize the loss function and improve computational efficiency. It also introduces regularization terms to prevent overfitting. It is a controversial algorithm, so it will only be mentioned briefly here.</p>
+</section>
+</section>
+</section>
+<section id="stacking" class="level2">
+<h2 class="anchored" data-anchor-id="stacking">Stacking</h2>
+<p><strong>Stacking</strong> is a technique that logically combines independently trained models to improve performance. It is a meta-algorithm that can be used with any combination of base models.</p>
+<p>I had trouble trainig a good CNN that predicts the label of the <a href="https://www.cs.toronto.edu/~kriz/cifar.html">CIFAR-10 dataset</a>. My model got confused between cats and dogs a little bit too often. As such I propose a stacking model as shown below:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/stacking-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+<p>The key idea is to generate metaclasses that combine similar classes: - Cats and dogs - Other animals - Vehicles</p>
+<p>Then I trained a models that predict the metaclasses, a model for each of the metaclasses that predicts the label or if the image is in the incorrect metaclass, and a final catch-all model that predicts the label if the image is in the incorrect metaclass.</p>
+<section id="cascading" class="level4">
+<h4 class="anchored" data-anchor-id="cascading">Cascading</h4>
+<p><strong>Cascading</strong> is a variant of stacking, where each model is applied sequentially to the data. Unlike the previous example, there’s no split paths. The following image shows how cascading can be used to tackle the classification of the CIFAR-10 dataset:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/stacking-2.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
+</figure>
+</div>
+<p>Now each model acts as a one vs all model. The first model predicts if the label should be “dog”, the second model predicts if the label should be “cat”, and so on. As such it is important to train a model with recall and specificity in mind.</p>
+</section>
+</section>
+<section id="not-pytorch" class="level2">
+<h2 class="anchored" data-anchor-id="not-pytorch">Not PyTorch</h2>
+<section id="bagging-1" class="level4">
+<h4 class="anchored" data-anchor-id="bagging-1">Bagging</h4>
+</section>
+<section id="stacking-1" class="level4">
+<h4 class="anchored" data-anchor-id="stacking-1">Stacking</h4>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

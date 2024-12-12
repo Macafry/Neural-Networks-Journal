@@ -1,0 +1,33 @@
+---
+includes:
+  in-header: ../metadata.yaml
+---
+
+# MATH 4700 Journal
+
+This is a collection of the knowledge I have accumulated accumulated over an independent learning semester covering topics in machine learning with a focus on deep learning and neural networs. The purpose of this journal twofold: to conserve the knowledge acquired and as the Final Project for the course. The following is a list of the topics covered in the course:
+
+### Chapter 1 - Basics of Machine Learning
+
+1. [Introduction to Machine Learning](chapter%201/Intoduction.html)
+2. [Loss functions](chapter%201/LossFunctions.html)
+3. [Tensors and Multivariate Calculus](chapter%201/Multiverse.html)
+
+### Chapter 2 - Neural Networks
+
+1. [Introduction to Neural Networks](chapter%202/MultiLayerPerceptron.html)
+2. [How to train Neural Networks - Optimization](chapter%202/Training.html)
+3. [Good practices for Neural Networks](chapter%202/GoodPractices.html)
+4. [Convolutional Neural Networks](chapter%202/ConvolutionalNN.html)
+5. [Autoencoders](chapter%202/Autoencoders.html)
+6. ~~Recurrent Neural Networks and beyond~~
+
+### Chapter 3 - Other Machine Learning Topics
+
+1. [Decision Trees](chapter%203/CART.html)
+2. [Ensemble Methods](chapter%203/ensemble.html)
+3. Gaussian Mixture Models
+
+Note that this isn't my first time dealing with machine learning, as such some of the more basic topics are not covered in detail or outright omitted.
+
+For time constraints the section about Recurrent Neural Networks is not available yet.

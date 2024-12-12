@@ -1,0 +1,155 @@
+---
+includes:
+  in-header: ../metadata.yaml
+---
+
+# Loss Functions
+
+When training a machine learning model, we need a way to measure how well our model is performing. This is where loss functions, denoted as $\operatorname{L_{type}}$, come in. **Loss functions** are used to quantify the difference between the predicted output of a model and the actual output. The goal of training a machine learning model is to minimize the loss function, which means making the model's predictions as close as possible to the actual output. Depending on the type of problem we are trying to solve, we can choose different loss functions. For example, if we are trying to classify images, we might use a cross-entropy loss function. If we are trying to predict a continuous value, we might use a mean squared error loss function. This section explores some of the most commonly used loss functions in machine learning.
+
+However, one thing to consider is that the loss function is typically composed by several individal losses, each one corresponding to a different sample. There are two principal ways to aggregate these losses into a single value: averaging them or adding them up. The choice of aggregation method depends on the specific problem and the desired behavior of the model. However, in general, averaging is more common and is typically the default choice. But, for simplicity sake, we will focus on the addition aggregation when defining loss functions.
+
+## Regression - Mean Squared Error (MSE)
+
+Mean Squared Error (MSE) is the quintessential loss function for regression problems. It measures the average squared difference between the predicted values and the actual values. The most common formula for MSE is:
+
+
+$$
+\operatorname{L_{MSE}}(y, \hat{y}) = \frac{1}{2} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+$$
+
+There are other loss functions that are used in regression problems, such as Mean Absolute Error (MAE) and R-squared. However, MSE is the most commonly used loss function for regression problems because it is easy to understand and compute, and it has desirable statistical properties, such as being (easily) differentiable and convex.
+
+## Classification - Count based losses
+
+#### Confusion Matrix
+
+While not a loss function itself, a **confusion matrix** (CM) is a table that is often used to describe the performance of a classification model. It shows the number of true positives, true negatives, false positives, and false negatives for a given set of predictions. 
+
+From this matrix, we can calculate other metrics such as accuracy, precision, recall, and F1 score. The columns of a confusion matrix represent the predicted classes, while the rows represent the actual classes. 
+
+Consider the following example of confusion matrix:
+
+|class | Blue | Green | Red |
+|------|-------|------|-----|
+|Blue  | 100   | 2    | 3   |
+|Green | 5     | 95   | 8   |
+|Red   | 10    | 7    | 80  |
+
+Can observe that the diagonal elements represent the number of correct predictions for each class, while other elements represent the number of incorrect predictions (the actual class is on the row and the predicted class is on the column).
+
+#### Accuracy
+
+The easiest derived metric is **accuracy**, which is the number of correct predictions over the total number of predictions, or the proportion of correct predictions. We can calculate it as follows:
+
+$$
+\operatorname{Accuracy}=\dfrac{\text { Number of correct predictions }}{\text { Total number of predictions }} = \dfrac{\operatorname{trace}(CM)}{N} 
+$$
+
+However, often Confusion Matrix-derived metrics are not suitable to train a machine learning model for one key reason: they are not differentiable. Later sections will explain why we might want loss to be differentiable. Nevertheless, we can still use Confusion Matrix-derived metrics to evaluate and _interpret_ the performance of a trained model.
+
+## Entropy
+
+**Entropy** is a measure of uncertainty or randomness. It has several derived uses in the context of machine learning, some of which are loss functions. The entropy of a probability distribution, $p$, is defined as follows:
+
+$$
+H(p)=−\sum_{i=1}^{n} p_{i} \log p_{i}
+$$
+
+It can be interpreted as the "surprise" of a distribution. For example, if we have a fair coin flip, the entropy is 1, because there are two possible outcomes, each with a 50% probability. If we have a biased coin flip, where heads has a 90% probability and tails has a 10% probability, the entropy is lower, because the outcome is less surprising. 
+
+In the context of machine learning, $p$ is often a probability vector of $K$ classes. As a side note, maximum entropy for $p$ happens at a uniform distribution, i.e., $p_i = \frac{1}{k}$, with $H(p) = \log(k)$.
+
+#### Cross-Entropy (CE)
+
+**Cross-entropy** is an asymmetric measure of the difference between two probability distributions. It can be interpreted as the "surprise" of a using distribution $q$ (predicted), when trying to describe a distribution $p$ (true). The cross-entropy between two probability distributions, $p$ and $q$, is defined as follows:
+
+$$
+H(p, q)=−\sum_{i=1}^{n} p_{i} \log q_{i}
+$$
+
+
+We can use cross-entropy as a loss function for a classsification problem. In this case, $y_i$ is the true distribution vector, and $\hat{y}_i$ is the predicted distribution vector. Then, the cross-entropy loss function is defined as follows:
+
+$$
+\operatorname{L_{CE}}(y, \hat{y})=-\sum_{i=1}^{n} y_{i} \log \hat{y}_{i}
+$$
+
+
+
+#### Binary Cross-Entropy (BCE)
+
+**Binary cross-entropy** is a special case of cross-entropy for binary classification problems. In these cases, a predicted probability is enough to represent the distribution, so the predicted distribution vector $\hat{y}_i$ is a single value between 0 and 1. The binary cross-entropy loss function is defined as follows:
+$$
+\operatorname{L_{BCE}}(y, \hat{y})= -\sum_{i=1}^{n} \Big( y_{i} \log \hat{y}_{i} + (1-y_{i}) \log (1-\hat{y}_{i}) \Big)
+$$
+
+However, this can also be used for several simultaneous binary classification problems, in which case the predicted distribution vector $\hat{y}_i$ is a vector of $k$ probabilities, and the loss function is defined as follows:
+
+$$
+\operatorname{L_{BCE}}(y, \hat{y})= -\sum_{i=1}^{n} \sum_{j=1}^{k} \Big( y_{i j} \log \hat{y}_{i j} + (1-y_{i j}) \log (1-\hat{y}_{i j}) \Big)
+$$
+
+One must only use BCE loss when dealing with true binary values and not just values between 0 and 1. Using BCE loss with values between 0 and 1 will likely result in a case of exploding gradients, which will be explained in a later section. For now, trust that we dont want exploding gradients.
+
+
+## Multi-Objective Loss Functions - Regularization
+
+A loss function is not just a measure of how well a model is performing, it is also a measure of how well the model is generalizing. This is why we have regularization loss functions. Regularization loss functions are used to penalize the model for overfitting. 
+
+To create a loss function with regularization, we simply add a (scaled) regularization term to the base loss function. The scaling factor is called the regularization parameter, and it is denoted by $\lambda \ge 0$. The regularization parameter is a hyperparameter that must be tuned. A general form of a loss function with regularization is:
+
+$$
+L(y, \hat{y}) = L_{\text{base}}(y, \hat{y}) + \lambda C(w)
+$$
+
+Where $R(\theta)$ is the regularization term, and $\theta$ is the model parameters. The regularization term is usually a function of the model parameters, and it is used to penalize the model for having large parameters. Next we will look at some common regularization loss functions in machine learning. 
+
+#### L2 Regularization
+
+**L2 Regularization** is the most popular regularization technique. In the context of regression, it is also known as **Ridge Regression**. It penalizes large parameter values and it behaves very similarly to the MSE loss. One of the reasons its easy to compute derivative.
+
+The L2 regularization term is defined as follows:
+
+$$
+C(w) = \frac{1}{2} \sum_{i=1}^{n} w^2
+$$
+
+There are other Lp regularization techniques, but L2 is the most popular one. The second most popular one is L1 regularization, which is also known as **Lasso Regression** in the context of regression. It also penalizes larger terms, but may also perform feature selection. We won't use it in this course, but the formula goes as follows:
+
+$$
+C(w) = \sum_{i=1}^{n} |w|
+$$
+
+In the context of neural networks, L2 regularization is also known as **weight decay**.
+
+#### KL-Divergence
+
+**KL-Divergence** is a measure of how one probability distribution is different from a second, reference probability distribution. It is useful when we want to _force_ a value to follow a specific distribution. It can be interpreted as the added "surprise" of a using distribution $q$ (predicted), when trying to describe a distribution $p$ (true). It is defined as follows:
+
+$$
+D_{KL}(p||q) = \sum_{i=1}^{n} p_i \log \frac{p_i}{q_i}
+$$
+
+It can also be shown that:
+
+$$
+D_{KL}(p||q) = H(p,q) - H(p)
+$$
+
+Where $H(p,q)$ is the **Cross-Entropy** and $H(p)$ is the **Entropy** of the distribution $p$. Hence the addaed surprise interpretation. 
+
+This regularization is typically computed in terms of distribution parameters. For instance, if we fix $q$ to be a standard normal distribution, and $p$ is a normal distribution with mean $\mu$ and variance $\sigma$, then by following the derivation from [The Book of Statistical Proofs](https://statproofbook.github.io/P/norm-kl.html), we get the following formula for the KL-Divergence:
+
+$$
+D_{KL}(p||q) = -\frac{1}{2} \left[ 1 - \mu^2 - \sigma^2 - \log(\sigma^2) \right]
+$$
+
+At first it might not make sense to fix $q$ as it is the approximate distribution, fitting a distribution using KL divergence has two modes depending on which argument is the true distribuion. If $p$ is the true distribution, then the fitted distribution will become _mode seeking_, that is, it will try to fit to a peak of the distribution. If $q$ is the true distribution, then the fitted distribution will become _mean seeking_, that is, it will try to adjust itself to have the same mean as the distribution. Since for a normal the mean is the same as the mode, the two modes are equivalent. Also, fixing $q$ results in a nice closed form solution for the KL-Divergence.
+
+---
+
+For now these are all the loss and regularization functions we will be using. A couple more will be introduced when we discuss Decision Trees (CART) as a basic understanding of them is needed to motivate the repective losses. 
+
+
+

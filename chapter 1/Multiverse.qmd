@@ -1,0 +1,195 @@
+---
+includes:
+  in-header: ../metadata.yaml
+---
+
+# Higher Dimensional Mathematics
+
+While Linear Algebra is a powerful tool for understanding the world around us, it is limited in its ability to describe the complex and interconnected nature of the universe. To overcome these limitations, we must turn to the study of higher dimensional mathematics. We need to learn about tensors.
+
+## Tensors
+
+For the purposes of Machine Learning, we can think of tensors as multidimensional arrays. They are a generalization of vectors and matrices, and they can be used to represent a wide variety of mathematical objects, including vectors, scalars, and matrices. For instance and image, with 3 color channels can be represented as a 3-dimensional tensor and thus a dataset of such images can be represented as a 4-dimensional tensor. 
+
+Tensors can perform many of the same operations as vectors and matrices, such as addition, subtraction, and multiplication, but they can also be used to represent more complex mathematical objects - we won't delve into such concepts here. However, as tensors have more than 2 dimensions, transposes behave a little bit different - we need to specify the dimensions we want to transpose. 
+
+Fortunately, pytorch can and will handle all the needed tensor operations for us. We can create tensors using the `torch.tensor` function.
+
+```{python pytorch-tensors}
+import torch
+
+# Create a 1-dimensional tensor
+x = torch.tensor([1, 2, 3])
+
+# Create a 2-dimensional tensor
+y = torch.tensor([[1, 2, 3], [4, 5, 6]])
+
+# Create a 3-dimensional tensor
+z = torch.tensor([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
+
+print(x)
+print(y)
+print(z)
+```
+
+We can also perform operations on tensors using the methods provided by the class. 
+```{python pytorch-tensor-operations}
+a = torch.tensor([[1, 2, 3], [4, 5, 6]])
+b = torch.tensor([[7, 8, 9], [10, 11, 12]])
+
+# Add tensors
+c = a + b
+print(c)
+
+# Subtract tensors
+d = a - b
+print(d)
+
+# Multiply tensors (element wise)
+e = a * b
+print(e)
+
+# Divide tensors (element wise)
+f = a / b
+print(f)
+
+# Matrix multiplication
+g = a @ b.transpose(0, 1)
+print(g)
+
+# Mathematical operations
+h = torch.sqrt(a)
+print(h)
+```
+
+Note that the `transpose` method is used to transpose the tensor `b`. For tensors with 3+ dimensions, the `transpose` method can be used to swap 2 dimensions around, while the `permute` method can be used to change the order of the dimensions.
+
+```{python pytorch-dimension-operations}
+a = torch.tensor([[[1, 2, 3], [4, 5, 6]]])
+
+# Dimensions of a
+print("Raw tensor:")
+print(a)
+print(a.size())
+
+# Swap dimensions 0 and 1
+b = a.transpose(0, 1)
+print("\nTranspose 0 and 1:")
+print(b)
+print(b.size())
+
+# Permute the tensor dimensions to (2, 0, 1)
+c = a.permute(2, 0, 1)
+print("\nPermute to (2, 0, 1):")
+print(c)
+print(c.size())
+```
+
+Finally, if we want to insert a dimension of size 1 into a tensor, we can use the `unsqueeze` method. If we want to remove a dimension of size 1, we can use the `squeeze` method. We can use `expand` in conjucntion with `unsqueeze` to copy a tensor along a new dimension. Finally, we can use `flatten` to flatten a tensor into a 1D tensor or vector and `unflatten` to reshape a vector into the desired-shape tensor.
+
+```{python pytorch-dimension-operations2}
+a = torch.tensor([[[1, 2, 3], [4, 5, 6]]])
+
+# Dimensions of a
+print("Raw tensor:")
+print(a)
+print(a.size())
+
+# Insert a dimension of size 1 at position 0
+b = a.unsqueeze(0)
+print("\nUnsqueeze at position 0:")
+print(b)
+print(b.size())
+
+# Remove the dimension of size 1 at position 0
+c = a.squeeze(0)
+print("\nSqueeze at position 0:")
+print(c)
+print(c.size())
+
+# Expand a tensor along a new dimension
+d = a.unsqueeze(0).expand(2, -1, -1, -1) # -1 means the size is unchanged
+print("\nExpand along a new dimension:")
+print(d)
+print(d.size())
+
+# Flatten a tensor into a 1D tensor
+e = a.flatten()
+print("\nFlatten a tensor into a 1D tensor:")
+print(e)
+print(e.size())
+
+# Unflatten a vector into a tensor of desired shape
+f = e.unflatten(0, (1, 2, 3))
+print("\nUnflatten a vector into a tensor of desired shape:")
+print(f)
+print(f.size())
+```
+
+## Multivariable Calculus
+As we just saw, any tensor can be flattened into a vector, as such, we can focus on vector calculus for now (PyTorch will handle all implementation details for us anyways). Let's start with the basics of multivariable derivatives.
+
+First, let's define a function of two variables:
+
+$f(x, y) = x^2 + xy + y^2$
+
+We can take the derivative of this function with respect to $x$ and $y$ respectively, by treating the other variable as a constant:
+
+- $\frac{\partial f}{\partial x} = 2x + y$
+- $\frac{\partial f}{\partial y} = x + 2y$
+
+We can also take the gradient of this function, which is a vector of partial derivatives. Note however, this should be a row-vector as opposed to the usual column-vector.
+
+$\nabla f = \begin{bmatrix} \frac{\partial f}{\partial x} & \frac{\partial f}{\partial y} \end{bmatrix} = \begin{bmatrix} 2x + y & x + 2y \end{bmatrix}$
+
+We can also package $x$ and $y$ into a xolumn-vector, $\textbf{x} = (x, y)$. Thus, $f(\textbf{x}) = \textbf{x}_1^2 + \textbf{x}_1x_2 + \textbf{x}_2^2$. Then computing the gradient of $f$ with respect to $\textbf{x}$ is the same as computing the partial derivatives of $f$ with respect to each component of $\textbf{x}$. The result is still a row-vector.
+
+$\nabla f = \dfrac{df}{d\textbf{x}} = \begin{bmatrix} \frac{\partial f}{\partial \textbf{x}_1} & \frac{\partial f}{\partial \textbf{x}_2} \end{bmatrix} = \begin{bmatrix} 2\textbf{x}_1 + \textbf{x}_2 & \textbf{x}_1 + 2\textbf{x}_2 \end{bmatrix}$
+
+A function can also be a vector function, meaning it outputs a vector (typically column-vector). Consider the following function:
+
+$\textbf{f}(x) = \begin{bmatrix} x^2   \\ e^x \end{bmatrix}$
+
+The derivative of such a function can be obtained by taking the derivative of each component of the function with respect to $x$. It retains it's shape.
+
+$\dfrac{d\textbf{f}}{dx} = \begin{bmatrix} \frac{d}{dx}(x^2) \\ \frac{d}{dx}(e^x) \end{bmatrix} = \begin{bmatrix} 2x \\ e^x \end{bmatrix}$.
+
+We can also have a vector function that takes a vector as input. Consider the following function:
+
+$\textbf{f}(\textbf{x}) = \begin{bmatrix} \textbf{x}_1^2 + \textbf{x}_2^2 \\ e^{\textbf{x}_1} \end{bmatrix}$
+
+The derivative of such a function is a matrix called the Jacobian matrix. It is a matrix of partial derivatives of the function with respect to each component of the input vector. If the input vector has $n$ components and the output vector has $m$ components, the Jacobian matrix will have $m$ rows and $n$ columns.
+
+$$
+\dfrac{d\textbf{f}}{d\textbf{x}} = \textbf{J}^{\textbf{f}}_{\textbf{x}} = \begin{bmatrix} 
+\dfrac{\partial \textbf{f}_1}{\partial \textbf{x}_1} & \dfrac{\partial \textbf{f}_1}{\partial \textbf{x}_2} \\ 
+\dfrac{\partial \textbf{f}_2}{\partial \textbf{x}_1} & \dfrac{\partial \textbf{f}_2}{\partial \textbf{x}_2} 
+\end{bmatrix} = \begin{bmatrix}
+2\textbf{x}_1 & 2\textbf{x}_2 \\
+e^{\textbf{x}_1} & 0 
+\end{bmatrix}
+$$
+
+The Jacobian matrix is the key concept of multivariable caculus. With the jacobian in mind, we can easily expand the concept of the chain rule to multivariable functions. Consider the following composition of functions:
+
+$$
+\textbf{f}(\textbf{x}) = \textbf{g}(\textbf{h}(\textbf{x}))
+$$
+
+The derivative of this function with respect to $\textbf{x}$ can be expressed as:
+
+$$
+\dfrac{d\textbf{f}}{d\textbf{x}} = \dfrac{d\textbf{g}}{d\textbf{h}} \dfrac{d\textbf{h}}{d\textbf{x}} = \textbf{J}^{\textbf{g}}_{\textbf{h}} \textbf{J}^{\textbf{h}}_{\textbf{x}}
+$$
+
+ We can also have a function that depends on multiple vectors, and outputs a single vector. The partial derivatives of this function will be jacobian matrices. Finally, we need to consider dependency chains. Consider the following relationship between vectors functions: $\textbf{u}(\textbf{x}, \textbf{y})$, $\textbf{v}(\textbf{x}, \textbf{y})$, and $\textbf{w}(\textbf{u}, \textbf{v})$. Then the partial derivatives are:
+
+$$
+\dfrac{\partial\textbf{w}}{\partial\textbf{x}} = \dfrac{\partial\textbf{w}}{\partial\textbf{u}} \dfrac{\partial\textbf{u}}{\partial\textbf{x}} + \dfrac{\partial\textbf{w}}{\partial\textbf{v}} \dfrac{\partial\textbf{v}}{\partial\textbf{x}}
+ \text{    and    }
+\dfrac{\partial\textbf{w}}{\partial\textbf{y}} = \dfrac{\partial\textbf{w}}{\partial\textbf{u}} \dfrac{\partial\textbf{u}}{\partial\textbf{y}} + \dfrac{\partial\textbf{w}}{\partial\textbf{v}} \dfrac{\partial\textbf{v}}{\partial\textbf{y}}
+$$
+
+As $\textbf{w}$ depends on $\textbf{x}$ through $\textbf{u}$ and $\textbf{v}$, we need to add each contribution to the derivative. The same is true for the derivative with respect to $\textbf{y}$.
+
+As we observe, multivariate derivatives are not that different from the single variable case with the right perspective. This is just scraping the surface of multivariable calculus, but it is all we'll need to understand how PyTorch trains Neural Networks with it's automatic gradient and back propagation. 

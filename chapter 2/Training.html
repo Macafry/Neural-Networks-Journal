@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>training</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Training_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Training_files/libs/quarto-html/quarto.js"></script>
+<script src="Training_files/libs/quarto-html/popper.min.js"></script>
+<script src="Training_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Training_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Training_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Training_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Training_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Training_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Training_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Training a Neural Network</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In this section, we will train a neural network to classify images of handwritten digits from the MNIST dataset. We will use the PyTorch library to implement the neural network and train it using stochastic gradient descent.</p>
+<section id="problem-definition" class="level2">
+<h2 class="anchored" data-anchor-id="problem-definition">Problem definition</h2>
+<p>Before we can train a neural network we need to define the problem we want to solve. Is it classification, regression, or something else? What is the input and output? What are their respective sizes? What is the loss function? How many layers and neurons should our network have?</p>
+<p>Generally, the input size correlates with the number of features in the dataset. The output size is the number of classes we want to predict (classification) or the number of values we want to predict (regression). The loss function will also depend on the problem we are trying to solve. For classification, we can use cross-entropy loss, and for regression, we can use mean squared error loss. The number of layers and neurons in the network will depend on the complexity of the problem and the amount of data we have. A good rule of thumb is to avoid building a network with more parameters than the number of data points we have.</p>
+</section>
+<section id="optimization---stochastic-gradient-descent" class="level2">
+<h2 class="anchored" data-anchor-id="optimization---stochastic-gradient-descent">Optimization - Stochastic Gradient Descent</h2>
+<p>Now that we’ve defined the problem and the Network Architecture, we are ready to find the optimal weights, <span class="math inline">\(w^*\)</span>, that satisfy the optimization objective:</p>
+<p><span class="math display">\[
+w^* = \underset{w \in W}{\mathrm{arg\,min}}  \sum_{i=1}^n L(y_i, F(x_i; w))
+\]</span></p>
+<p>In the case for Linear Regression, we can find an analytical solution, however this not the case for Neural Networks. We will need to use an optimization algorithm to find the optimal weights. The most common optimization algorithm used for Neural Networks is <strong>Stochastic Gradient Descent (SGD)</strong>.</p>
+<p>For simplicity’s sake, we’ll treat the weights as a vector as we’ve previously discussed we can flatten any tensor into a vector. We can do this for many tensors and concatenate them together to form a single vector.</p>
+<p>Then, for SGD we need an initial guess for the weights, <span class="math inline">\(w_0\)</span>, and then iteratively update the weights using the following equation:</p>
+<p><span class="math display">\[
+w_{t+1} = w_t - \eta \nabla_w \left( \sum_{(x,y) \in \text{Batch}_t} L(y, F(x; w_t)) \right)
+\]</span></p>
+<p>where <span class="math inline">\(\eta\)</span> is the learning rate, which controls the step size of the update. This value is typically <span class="math inline">\(10^{-3}\)</span>. The gradient <span class="math inline">\(\nabla_w L(y_i, F(x_i; w_t))\)</span> is the partial derivative of the loss function with respect to the weights, and it tells us in which direction to update the weights to minimize the loss.</p>
+<p>The reason we call the alorithm <em>Stochastic</em> Gradient Descent is because we are only using <em>randomly</em> selected subset partitions of the data (called batches) to calculate the gradient. At every time step we use a different batch, <span class="math inline">\(\text{Batch}_t\)</span>. This is done to reduce the computational cost and also to avoid overfitting. Every time we update the weights we are using a different batch of data, which is why it is called <em>stochastic</em>. Once we’ve exhausted all the batches, we repeat the process with a new set of batches. This is called an <strong>epoch</strong>.</p>
+<p>The learning rate, <span class="math inline">\(\eta\)</span>, the batch size (number of observations per batch), and the number of epochs are hyperparameters that we need to choose before we start training. These affect the performance of the model and the time it takes to train.</p>
+<section id="sgd-variants" class="level3">
+<h3 class="anchored" data-anchor-id="sgd-variants">SGD Variants</h3>
+<p>SGD is a good starting point, but it has some limitations. One of the main problems with SGD is that it can be slow to converge, especially for deep neural networks. This is because the learning rate is the same for all weights, and it may not be optimal for all weights. There are other algorithms that try to address this problem.</p>
+<p>Before we discuss these algorithms, let’s define <span class="math inline">\(g_t\)</span> as the gradient at step <span class="math inline">\(t\)</span> for the sake of consicion. <span class="math display">\[
+g_t = \nabla_w \left( \sum_{(x,y) \in \text{Batch}_t} L(y, F(x; w_t)) \right)
+\]</span></p>
+<section id="sgd-with-momentum" class="level4">
+<h4 class="anchored" data-anchor-id="sgd-with-momentum">SGD with momentum</h4>
+<p>One thing that can help speed up convergence is to use a technique called momentum. Momentum speeds up training when consecutive gradients are in the same direction, and slows it down when they are in opposite directions. The formula is as follows:</p>
+<p><span class="math display">\[\begin{align}
+v_t &amp;= \mu\,v_{t-1} + \eta\,g_t \\
+w_t &amp;= w_{t-1} - v_t
+\end{align}\]</span></p>
+<p>Where <span class="math inline">\(\mu\)</span> is the momentum hyper-parameter.</p>
+</section>
+<section id="adagrad-addaptive-gradient-sgd" class="level4">
+<h4 class="anchored" data-anchor-id="adagrad-addaptive-gradient-sgd">Adagrad (Addaptive Gradient SGD)</h4>
+<p>Another technique that can help speed up convergence is to use a technique called Adagrad. Adagrad adjusts the learning process for each weight based on how much it has been updated. The formula is as follows:</p>
+<p><span class="math display">\[
+(w_{t+1})_i = (w_t)_i - \frac{\eta}{\sqrt{\sum_{k=0}^t (g_k)_i^2 + \epsilon}} (g_t)_i
+\]</span></p>
+<p>We can simplify the formula if we assume all operations are performed component-wise:</p>
+<p><span class="math display">\[
+w_{t+1} = w_t - \frac{\eta}{\sqrt{\sum_{k=0}^t g_k^2 + \epsilon}} g_t
+\]</span></p>
+<p>Where <span class="math inline">\(\epsilon\)</span> is a small constant to avoid division by zero, typically <span class="math inline">\(10^{-8}\)</span>. When <span class="math inline">\(t\)</span> is large enough, the learning process essentially halts.</p>
+</section>
+<section id="rmsprop-root-mean-square-propagation" class="level4">
+<h4 class="anchored" data-anchor-id="rmsprop-root-mean-square-propagation">RMSprop (Root Mean Square Propagation)</h4>
+<p>Another technique that can help speed up convergence is to use a technique called RMSprop. RMSprop adjusts the learning process for each weight based on the moving average of the squared gradients. By using a moving average rather than the sum, we can avoid the problem of the sum growing too large. The formula is as follows (component-wise):</p>
+<p><span class="math display">\[\begin{align}
+v_t &amp;= \alpha\,v_{t-1} + (1-\alpha)\,g_t^2 \\
+w_{t+1} &amp;= w_t - \frac{\eta}{\sqrt{v_t + \epsilon}} g_t
+\end{align}\]</span></p>
+<p>Where <span class="math inline">\(\alpha\)</span> is the another hyper-parameter, typically <span class="math inline">\(0.9\)</span>.</p>
+</section>
+<section id="adam-adaptive-moment-estimation" class="level4">
+<h4 class="anchored" data-anchor-id="adam-adaptive-moment-estimation">Adam (Adaptive Moment Estimation)</h4>
+<p>The final technique we will discuss is called Adam. Adam combines the best properties of the SGD with momentum, AdaGrad, and RMSprop algorithms to provide an optimization algorithm that can handle many optimization tasks. The formula is as follows (component-wise):</p>
+<p><span class="math display">\[\begin{align}
+m_t &amp;= \beta_1\,m_{t-1} + (1-\beta_1)\,g_t \\
+v_t &amp;= \beta_2\,v_{t-1} + (1-\beta_2)\,g_t^2 \\
+\end{align}\]</span></p>
+<p><span class="math display">\[\begin{align}
+\hat{m}_t &amp;= \frac{m_t}{1-\beta_1^t} \\
+\hat{v}_t &amp;= \frac{v_t}{1-\beta_2^t} \\
+\end{align}\]</span></p>
+<p>Where <span class="math inline">\(\hat{m}_t\)</span> and <span class="math inline">\(\hat{v}_t\)</span> are the bias-corrected estimates of the moments and <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> are hyper-parameters, typically <span class="math inline">\(0.9\)</span> and <span class="math inline">\(0.999\)</span>, respectively.The final update rule is:</p>
+<p><span class="math display">\[\begin{align}
+w_{t+1} &amp;= w_t - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t
+\end{align}\]</span></p>
+<p>The following image shows the optimization alorithms we discussed under some fabricated, but important optimization scenarios:</p>
+<p><img src="figures/SGD-comparison.png" class="img-fluid"></p>
+<p>In the top 2 pictures, we can observe that SGD and SGD with momentum tend to run out of steam before reaching the minimum. We can also observe that under plateu scenerios, momentum is essentially needed thus, SGD with momentum and Adam are the only algorithms that can reach the minimum. However, this comes at a cost of possibly overshooting the minimum and gaving to backtrack, which we can observe with Adam in the top 2 pictures and SGD with momentum in the bottom right picture.</p>
+<p>Each optimization algorithm has its own advantages and disadvantages, and the choice of algorithm depends on the specific problem and dataset. However, if no prior knowledge is available, Adam is a safe default choice.</p>
+</section>
+</section>
+</section>
+<section id="optimization---automatic-differentiation-and-backpropagation" class="level2">
+<h2 class="anchored" data-anchor-id="optimization---automatic-differentiation-and-backpropagation">Optimization - Automatic Differentiation and Backpropagation</h2>
+<p>Now that we have a Mathematical Algorithm for optimization, we need to find a way to compute the gradient of the loss function. Traditional approaches such as manually coding gradients, numerical differentiation, and symbolic differentiation are too computationally expensive and inefficient. Thus, we need to find a new way to compute the gradient of the loss function. This is where automatic differentiation and backpropagation come in.</p>
+<p>For ease of notation, we will use the following simplified notation for partial derivatives with respect to the loss function:</p>
+<p><span class="math display">\[
+\overline{x} = \frac{\partial L}{\partial x}, \overline{y} = \frac{\partial L}{\partial y}, \overline{w} = \frac{\partial L}{\partial w}, \cdots
+\]</span></p>
+<p>Let’s beign with <strong>automatic differentiation</strong>.The key of automatic differentiation is to break down each formula into basic mathematical operations, and then compute the gradient of each operation. For example, the gradient of the addition operation is simply the gradient of each operand. Consider the following scenario:</p>
+<p><span class="math display">\[
+L = \frac{1}{2} (F(x_0; a, b) - y_0)^2 = \frac{1}{2} \Big(\sigma(a\,x + b) - y_0\Big)^2
+\]</span></p>
+<p>We can break down this formula into the following basic mathematical operations:</p>
+<span class="math display">\[\begin{aligned}
+a, b, x_0, y_0 \in \mathbb{R}, \\
+z = a\,x_0 + b \\
+y = \sigma(z) \\
+L = \frac{1}{2} (y - y_0)^2
+\end{aligned}\]</span>
+<p>Then we can find the gradient at each operation using the chain rule:</p>
+<span class="math display">\[\begin{aligned}
+\overline{L} &amp;= \frac{\partial L}{\partial L} = 1 \\
+\overline{y} &amp;= \frac{\partial L}{\partial y} = y - y_0 \\
+\overline{z} &amp;= \frac{\partial L}{\partial z} = \frac{\partial L}{\partial y} \cdot \frac{\partial y}{\partial z} = \overline{y} \cdot \sigma'(z)\\
+\overline{a} &amp;= \frac{\partial L}{\partial a} = \frac{\partial L}{\partial z} \cdot \frac{\partial z}{\partial a} = \overline{z} \cdot x_0 \\
+\overline{b} &amp;= \frac{\partial L}{\partial b} = \frac{\partial L}{\partial z} \cdot \frac{\partial z}{\partial b} = \overline{z} \\
+\end{aligned}\]</span>
+<p>In reality, we only care about the gradients for <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, however, by calculating all gradients, the process is much more computationally efficient, easier to implement, and we can easily extend this to more complex functions.</p>
+<p>One thing to note is that to compute the <em>values</em> it is more efficient to start with the more primitive values, and combine them until we get to the final value. This is called the <strong>forward pass</strong>. However, to compute the <em>gradients</em>, we start with the final value and propagate the gradients backwards. This is why we have the <span class="math inline">\(\overline{L}\)</span> term in the first equation, as it is the starting point for the gradient propagation or <strong>backward pass</strong>, hence the overall algorithm is called <strong>backpropagation</strong>.</p>
+<p>The following image illustrates the forward and backward passes for the above example. However, it uses <span class="math inline">\(\ell\)</span> instead of <span class="math inline">\(\overline{L}\)</span> to denote the loss function.</p>
+<p><img src="figures/autodiff-1.png" class="img-fluid"></p>
+</section>
+<section id="optimization---initialization" class="level2">
+<h2 class="anchored" data-anchor-id="optimization---initialization">Optimization - Initialization</h2>
+<section id="vanishing-and-exploding-gradients" class="level4">
+<h4 class="anchored" data-anchor-id="vanishing-and-exploding-gradients">Vanishing and Exploding Gradients</h4>
+<p>Not all gradients behave nicely. For instance, if we have a sequence of sigmoid functions composed with each other:</p>
+<p><span class="math display">\[
+\sigma^{(n)}(x) = (\sigma \circ \sigma \circ \cdots \circ \sigma)(x)
+\]</span></p>
+<p>It can be shown that the gradient of this function is bounded as follows:</p>
+<p><span class="math display">\[
+|\sigma^{(n)}(x)| \leq \frac{1}{4^n}
+\]</span></p>
+<p>As such, very deep networks with sigmoid activation functions are prone to <strong>vanishing gradients</strong>. This means that the gradients of the weights in the earlier layers will be very small, and as such, the weights will not be updated much. This can make training very difficult. The opposite problem, <strong>exploding gradients</strong>, can occur when the gradients are too large. Both of these are problems that one needs to be aware of when training deep networks.</p>
+<p>There are several ways to address these problems, such as carefully selecting activation functions, using gradient clipping, and initializing weights properly. This last one is the topic of this section.</p>
+</section>
+<section id="weight-initialization" class="level3">
+<h3 class="anchored" data-anchor-id="weight-initialization">Weight Initialization</h3>
+<p>The way in which we initialize the weights of a neural network can have a significant impact on the performance of the network. If the weights are initialized too large, the gradients can become too large and cause the network to diverge. If the weights are initialized too small, the gradients can become too small and cause the network to converge very slowly. Most importantly, if all the weights are initialized to the same value, they’ll never diverge and the network will not learn to it’s full potential. As such, it is important to initialize the weights of a neural network properly.</p>
+<p>The most comon technique is to use a random initalization scheme, using either uniform distribution for it’s simplicity or normal distribution for it’s fundamental properties in probability. This then proposes a question, how do we choose the parameters of the distribution? We’ll show 2 different approaches to this problem.</p>
+<p>The goal of this section is to find a way to initialize the parameters of the neural network such that the variance of the output of the neural network is equal to the variance of the input to the neural network.</p>
+<section id="assumptions-and-goal" class="level4">
+<h4 class="anchored" data-anchor-id="assumptions-and-goal">Assumptions and Goal</h4>
+<p>There will be some assumptions that we’ll make in this section:</p>
+<ol type="1">
+<li><p><strong>Identically distributed layers</strong>: We’ll assume that the layers of the neural network are identically distributed: <span class="math display">\[\begin{align}
+\mathbb{E}[z^{(t)}_1] &amp;= \mathbb{E}[z^{(t)}_2] = \cdots = \mathbb{E}[z^{(t)}_n]  = \mathbb{E}_{z^{(t)}}\\
+\operatorname{Var}(z^{(t)}_1) &amp;= \operatorname{Var}(z^{(t)}_2) = \cdots = \operatorname{Var}(z^{(t)}_n)  = \operatorname{Var}_{z^{(t)}}
+\end{align}\]</span></p></li>
+<li><p><strong>Centered distributions</strong>: We’ll assume that the distributions for both data and parameters are centered, meaning that the mean is 0: <span class="math display">\[
+\mathbb{E}_{z^{(t)}} = 0,\,\mathbb{E}[w_i] = 0\,\,\forall w_i \in w
+\]</span></p></li>
+<li><p><strong>Constant initial biases</strong>: Biases will be initialized to 0.</p></li>
+<li><p><strong>Constant Variances</strong>: Our goal will be for the variance of the weights to be constant with a value of 1.</p></li>
+</ol>
+<p>These are some very restrictive assumptions, however, in practice, the following techniques work well even if the assumptions are not met. Data preparation can help make the assumptions more accurate if need be.</p>
+<p>With these assumptions and goals in mind, we can take a look at the following Initialization methods.</p>
+</section>
+<section id="stochastic-initalization" class="level4">
+<h4 class="anchored" data-anchor-id="stochastic-initalization">Stochastic Initalization</h4>
+<p>Stochastic initalization tries to keep the overall variance between layers roughly the same:</p>
+<p><span class="math display">\[
+\sum_{Y\,\in\,z^{(t+1)}} Var(Y)^2 \approx \sum_{X\,\in\,z^{(t)}} Var(X)^2
+\]</span></p>
+<p>After several pages of mathematical derivation, this results in the following distribution candidates for the weights:</p>
+<p><span class="math display">\[\begin{align}
+w_i &amp;\overset{\mathrm{iid}}{\sim} \mathcal{Normal}\Big(0, \frac{16}{n}\Big) \\
+w_i &amp;\overset{\mathrm{iid}}{\sim} \mathcal{Uniform}\Big(-\sqrt{\frac{48}{n}}, \sqrt{\frac{48}{n}}\Big)
+\end{align}\]</span></p>
+<p>However, this is only true if no activation is applied to the weights. If we employ the ReLU activation function, the distributions become:</p>
+<p><span class="math display">\[\begin{align}
+w_i &amp;\overset{\mathrm{iid}}{\sim} \mathcal{Normal}\Big(0, \frac{2}{n}\Big) \\
+w_i &amp;\overset{\mathrm{iid}}{\sim} \mathcal{Uniform}\Big(-\sqrt{\frac{6}{n}}, \sqrt{\frac{6}{n}}\Big)
+\end{align}\]</span></p>
+</section>
+<section id="xavier-initialization" class="level4">
+<h4 class="anchored" data-anchor-id="xavier-initialization">Xavier Initialization</h4>
+<p>Xavier initialization tries to keep the variance between layers roughly the same through both the forward and backward pass. For this lets focus on a single linear layer with the forward pass:</p>
+<p><span class="math display">\[
+z^{(t+1)} = W^{(t)} z^{(t)} + b^{(t)}
+\]</span></p>
+<p>With the forward pass, the variance of the weights should be:</p>
+<p><span class="math display">\[
+Var(W^{(t)}_{ij}) = \frac{1}{n}
+\]</span></p>
+<p>With the backward pass, the variance of the weights should be:</p>
+<p><span class="math display">\[
+Var(W^{(t)}_{ij}) = \frac{1}{m}
+\]</span></p>
+<p>where <span class="math inline">\(n\)</span> is the dimension size of the <span class="math inline">\(z^{(t)}\)</span> and <span class="math inline">\(m\)</span> is the dimension size of the <span class="math inline">\(z^{(t + 1)}\)</span>. However, unless <span class="math inline">\(n=m\)</span> it is impossible for both of them to be true. A good compromise is the following:</p>
+<p><span class="math display">\[
+Var(W^{(t)}_{ij}) = \frac{1}{n+m}
+\]</span></p>
+<p>However, this is once again only the case without activation functions. Adding an activation function will multiply the variance by <span class="math inline">\(\alpha^2\)</span>, where alpha is a constant that depends on the activation function.</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Activation Function</th>
+<th><span class="math inline">\(\alpha\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>None</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>Sigmoid</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>Tanh</td>
+<td><span class="math inline">\(\frac{5}{3}\)</span></td>
+</tr>
+<tr class="even">
+<td>ReLU</td>
+<td><span class="math inline">\(\sqrt{2}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Leaky ReLU</td>
+<td><span class="math inline">\(\sqrt{\dfrac{2}{1+(\alpha_\text{Leaky ReLU})^2}}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>As such the distribution candidates for Xavier initialization are: <span class="math display">\[\begin{align}
+W^{(t)}_{ij} &amp;\overset{\mathrm{iid}}{\sim} \mathcal{Normal}\Big(0, \alpha^2\frac{2}{n+m}\Big) \\
+W^{(t)}_{ij} &amp;\overset{\mathrm{iid}}{\sim} \mathcal{Uniform}\left(-\alpha\sqrt{\frac{6}{n+m}}, \alpha\sqrt{\frac{6}{n+m}}\,\right)
+\end{align}\]</span></p>
+<hr>
+<p>There are other initialization schemes that are used in practice, such as <strong>He initialization</strong> and <strong>Glorot initialization</strong>. These are similar to Xavier initialization, but they use different formulas for the variance of the weights.</p>
+</section>
+</section>
+</section>
+<section id="pytorch" class="level2">
+<h2 class="anchored" data-anchor-id="pytorch">PyTorch</h2>
+<p>Now that we have a sufficient understanding of the necesary math to understand the training process, we can start to train our first neural network in PyTorch. For this, we’ll use the MNIST dataset, which consists of 28x28 pixel images of handwritten digits from 0 to 9. We’ll train a neural network to classify these images into the correct digit.</p>
+<p>First, we need to import the necessary libraries and load the MNIST dataset:</p>
+<div id="02bd6f73" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.transforms <span class="im">as</span> transforms</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="dee6a076" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data preprocessor function</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>transform <span class="op">=</span> transforms.Compose([</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    transforms.ToTensor(), </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> x: x[:,::<span class="dv">2</span>,::<span class="dv">2</span>], <span class="co"># downsample image by factor of 2</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    transforms.Normalize((<span class="fl">0.5</span>,), (<span class="fl">0.5</span>,))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the MNIST dataset</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>trainset <span class="op">=</span> torchvision.datasets.MNIST(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    root<span class="op">=</span><span class="st">'./data'</span>, </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    train<span class="op">=</span><span class="va">True</span>, <span class="co"># training set</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    download<span class="op">=</span><span class="va">True</span>, </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    transform<span class="op">=</span>transform</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>testset <span class="op">=</span> torchvision.datasets.MNIST(</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    root<span class="op">=</span><span class="st">'./data'</span>, </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    train<span class="op">=</span><span class="va">False</span>, <span class="co"># testing set</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    download<span class="op">=</span><span class="va">True</span>, </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    transform<span class="op">=</span>transform</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we need to define the neural network architecture. We’ll use a simple neural network with 2 hidden layers:</p>
+<div id="a18a90b2" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MNISTClassifier(nn.Module):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(MNISTClassifier, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layers <span class="op">=</span> nn.Sequential(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">14</span><span class="op">*</span><span class="dv">14</span>, <span class="dv">128</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">128</span>, <span class="dv">64</span>),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">64</span>, <span class="dv">10</span>),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">14</span><span class="op">*</span><span class="dv">14</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.layers(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, let’s define some hyperparameters and initialize the neural network and optimizer:</p>
+<div id="a8106d44" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># hyper parameter definition</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="op">=</span> <span class="fl">0.001</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>num_epochs <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">64</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># instantiate model</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># this is the step where PyTorch initializes the weights</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> MNISTClassifier()</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># define loss function</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>criterion <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># define optimizer (SGD algorithm)</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> optim.Adam(model.parameters(), lr<span class="op">=</span>learning_rate)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># create data loader (creates batches for SGD)</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>trainloader <span class="op">=</span> torch.utils.data.DataLoader(trainset, batch_size<span class="op">=</span>batch_size, shuffle<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, we can train the neural network using the training data:</p>
+<div id="ef0cbccd" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set model to training mode</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>model.train()</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># training</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(num_epochs): <span class="co"># loop over the dataset multiple times</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> images, labels <span class="kw">in</span> trainloader: <span class="co"># loop over dataset in batches</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># predict</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        outputs <span class="op">=</span> model(images)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute loss</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> criterion(outputs, labels)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Backward and optimize</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad() <span class="co"># prepare object for backpropagation</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        loss.backward() <span class="co"># compute gradients (backpropagation)</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        optimizer.step() <span class="co"># update weights (Adam)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Observe that PyTorch implements and hides all the previously discussed theory. While not necessarily necessary to understand the underlying theory, it is helpful to have a good understanding of the concepts in order to troubleshoot and optimize your models.</p>
+<p>Now, let’s take a look at test confusion matrix and accuracy metrics.</p>
+<div id="080ea377" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Training_files/figure-html/cell-7-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="504" height="449"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy: 0.1502</code></pre>
+</div>
+</div>
+<p>This isn’t the best result but it’s better than random guessing. The model became really good at identifying the 0s, and guessed most everything else as a 2, a 4, or some other wrong answer. Unfortunately, Multi-Layer Perceptrons are not very good at classifying images, especially when the images are not very clear. We also had to subsample the images to make them smaller, which significantly reduced the number of parameters (good), but also reduced the quality of the images. The subsampling step will be justified in the <strong>Good Practices for Neural Networks</strong> section, which comes next. For a better image classifier, we would need to use a <strong>Convolutional Neural Network</strong> (CNN), which will be discussed right after.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>intoduction</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Intoduction_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Intoduction_files/libs/quarto-html/quarto.js"></script>
+<script src="Intoduction_files/libs/quarto-html/popper.min.js"></script>
+<script src="Intoduction_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Intoduction_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Intoduction_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Intoduction_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Intoduction_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Intoduction_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Intoduction_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="machine-learning" class="level1">
+<h1>Machine Learning</h1>
+<section id="definition" class="level2">
+<h2 class="anchored" data-anchor-id="definition">Definition</h2>
+<p><strong>Machine learning</strong> doesn’t have a standard definition. The laxest definition considers machine learning as any algorithm that can learn from data. Other people associate machine learning with neural networks, deep learning, and other complex algorithms.</p>
+<p>Regardles of the definition there are some essential tasks that Machine Learning models aim to solve, these are known as the 4 pillars of Machine Learning:</p>
+<ul>
+<li>Regression - predicting a numerical value</li>
+<li>Classification - predicting a categorical value</li>
+<li>Density estimation - learning the underlying probability distribution of a dataset</li>
+<li>Dimensionality reduction - learning a lower-dimensional representation of a dataset</li>
+</ul>
+<p>During this course we’ll explore these 4 pillars in detail, mostly from the lense of Neural Networks, along with other relevant Machine Learning algorithms and models.</p>
+</section>
+<section id="notation" class="level2">
+<h2 class="anchored" data-anchor-id="notation">Notation</h2>
+<p>Before we move forward, we need to define some machine learning concepts. The general goal is to estimate function <span class="math inline">\(f: X \rightarrow Y\)</span> that maps from the <strong>feature space</strong> <span class="math inline">\(X\)</span> to the <strong>target space</strong> <span class="math inline">\(Y\)</span>. The estimated function is called a <strong>model</strong>. Let <span class="math inline">\(W\)</span> represent the parameter space or weight space of the model, then the model becomes <span class="math inline">\(F:X \times W\)</span>. The goal of machine learning is to find the best parameters <span class="math inline">\(w \in W\)</span> that minimize the error or loss of the model.</p>
+<ul>
+<li><span class="math inline">\(X\)</span> - The feature space. Typically a vector space, where each dimension represents a feature of the data.</li>
+<li><span class="math inline">\(Y\)</span> - The target space. The set of predictable variables. Typically, for regression problems, <span class="math inline">\(Y \subseteq \mathbb{R}^m\)</span>, while for classification problems, <span class="math inline">\(Y\)</span> is a set of classes such as <span class="math inline">\(\{ \text{cat}, \text{dog}, \text{bird}, ... \}\)</span>.</li>
+<li><span class="math inline">\(n\)</span> - The number of observations in the dataset.</li>
+<li><span class="math inline">\(\mathcal{X} = \{ x_i \in X \}_{i=1}^n\)</span> - The set of features of the dataset.</li>
+<li><span class="math inline">\(\mathcal{Y} = \{ y_i \in Y \}_{i=1}^n\)</span> - The set of target values of the dataset.</li>
+<li><span class="math inline">\(\mathcal{D} = \mathcal{X} \times \mathcal{Y} = \{ (x_i, y_i) \}_{i=1}^n\)</span> - The dataset, comprised of the features and target values for each observation.</li>
+<li><span class="math inline">\(L: Y \times Y \rightarrow \mathbb{R}\)</span> - The loss function, which measures how different are the predicted and actual target values. Later in this text, we will see that a differentiable loss function is preferred.</li>
+</ul>
+<p>Putting everything together, we can define the goal of supervised learning as the estimated parameters or weights <span class="math inline">\(w^*\)</span> that minimize the loss function:</p>
+<p><span class="math display">\[
+w^* = \underset{w \in W}{\mathrm{argmin}}  \sum_{i=1}^n L(y_i, F(x_i; w))
+\]</span></p>
+<section id="overfitting" class="level4">
+<h4 class="anchored" data-anchor-id="overfitting">Overfitting</h4>
+<p>Overfitting is a common problem in machine learning, where a model learns the data so well that it performs poorly on new, unseen data. To prevent overfitting, we first need to gauge if this is happening, which is done by splitting the data into a training set and a test set. Then the model is trained on the training set and evaluated on the test set. If the model performs poorly on the test set, it is likely overfitting. Another important technique to prevent overfitting is regularization, which adds a penalty term to the loss function to discourage complex models. So, our notation gets augmented as follows:</p>
+<ul>
+<li><span class="math inline">\(\mathcal{D}_{\text{train}}\)</span> - The training set, a subset of <span class="math inline">\(\mathcal{D}\)</span> used to train the model.</li>
+<li><span class="math inline">\(\mathcal{D}_{\text{test}}\)</span> - The test set, a subset of <span class="math inline">\(\mathcal{D}\)</span> used to evaluate the model.</li>
+<li><span class="math inline">\(C:W\leftarrow \mathbb{R}\)</span> - The regularization function, which penalizes complex models.</li>
+<li><span class="math inline">\(\lambda \in \mathbb{R}\)</span> - The regularization parameter, which controls the strength of the penalty.</li>
+</ul>
+<p>Notes - <span class="math inline">\(\mathcal{D}_{\text{train}}\)</span> and <span class="math inline">\(\mathcal{D}_{\text{test}}\)</span> are a partition of <span class="math inline">\(\mathcal{D}\)</span>. - Typically, <span class="math inline">\(\mathcal{D}_{\text{train}}\)</span> and <span class="math inline">\(\mathcal{D}_{\text{test}}\)</span> are chosen such that <span class="math inline">\(|\mathcal{D}_{\text{test}}| \approx 0.2 |\mathcal{D}|\)</span> and <span class="math inline">\(|\mathcal{D}_{\text{train}}| \approx 0.8 |\mathcal{D}|\)</span>, although this ratio can be adjusted. - We can have more than one regularization function and parameter, but we’ll focus on notation with just one.</p>
+<p>With this in mind, we can now define the loss function with regularization as follows:</p>
+<p><span class="math display">\[
+w^* = \underset{w \in W}{\mathrm{argmin}}  \sum_{(x,y) \in \mathcal{D}_{\text{train}}}  L(y, F(x; w)) + \lambda C(w)
+\]</span></p>
+<p>We also want the following to be true regardless of wether we are using a regularization function or not: <span class="math display">\[
+\dfrac{1}{|\mathcal{D}_{\text{train}}|} \sum_{(x,y) \in \mathcal{D}_{\text{train}}}  L(y, F(x; w*)) \approx \dfrac{1}{|\mathcal{D}_{\text{test}}|} \sum_{(x,y) \in \mathcal{D}_{\text{test}}}  L(y, F(x; w*))
+\]</span> Where the RHS is the training loss or error, and the LHS is the test loss or error - we want them to be close.</p>
+</section>
+</section>
+<section id="toolkit" class="level2">
+<h2 class="anchored" data-anchor-id="toolkit">Toolkit</h2>
+<p>Throught this course, we’ll use the python programming language, and the following libraries:</p>
+<ul>
+<li><code>numPy</code> and <code>scipy</code> for general purpose mathematical operations.</li>
+<li><code>matplotlib</code> and <code>seaborn</code> for plotting.</li>
+<li><code>pandas</code> and <code>scikit-learn</code> for data manipulation.</li>
+<li><code>scikit-learn</code> for machine learning algorithms and data sets.</li>
+<li><code>pytorch</code> as a Neural Network framework and some mathematical operations.</li>
+</ul>
+<p>For an easy installation you can use the following terminal command:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install numpy scipy matplotlib seaborn pandas scikit-learn pytorch</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="pytorch" class="level4">
+<h4 class="anchored" data-anchor-id="pytorch">PyTorch</h4>
+<p>PyTorch is one of the most popular Neural Network frameworks, rivaled by TensorFlow. While TensorFlow is more popular in industry, pytorch is more popular in research. PyTorch exposes more of the underlying mechanisms of Neural Networks, making it a fantastic tool for learning the underlying concepts of Neural Networks. It is important to recognize that we can also expose these underlying mechanisms using the <code>keras</code> module form TensorFlow, but we will use PyTorch for this course.</p>
+</section>
+<section id="scikit-learn" class="level4">
+<h4 class="anchored" data-anchor-id="scikit-learn">Scikit-Learn</h4>
+<p>SciKit-Learn is a python library for machine learning. It provides a wide range of algorithms for classification, regression, clustering, dimensionality reduction, model selection, and preprocessing. It also provides a wide range of data sets for testing and benchmarking. While it will not be the main character in this course, it will come in handy when we branch off from Neural Networks and explore other machine learning techniques.</p>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

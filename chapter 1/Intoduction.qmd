@@ -1,0 +1,88 @@
+---
+includes:
+  in-header: ../metadata.yaml
+---
+
+# Machine Learning
+
+## Definition
+
+**Machine learning** doesn't have a standard definition. The laxest definition considers machine learning as any algorithm that can learn from data. Other people associate machine learning with neural networks, deep learning, and other complex algorithms. 
+
+Regardles of the definition there are some essential tasks that Machine Learning models aim to solve, these are known as the 4 pillars of Machine Learning:
+
+- Regression - predicting a numerical value
+- Classification - predicting a categorical value
+- Density estimation - learning the underlying probability distribution of a dataset
+- Dimensionality reduction - learning a lower-dimensional representation of a dataset
+
+During this course we'll explore these 4 pillars in detail, mostly from the lense of Neural Networks, along with other relevant Machine Learning algorithms and models.  
+
+## Notation
+Before we move forward, we need to define some machine learning concepts.
+ The general goal is to estimate function $f: X \rightarrow Y$ that maps from the **feature space** $X$ to the **target space** $Y$. The estimated function is called a **model**. Let $W$ represent the parameter space or weight space of the model, then the model becomes $F:X \times W$. The goal of machine learning is to find the best parameters $w \in W$ that minimize the error or loss of the model.
+
+ - $X$ - The feature space. Typically a vector space, where each dimension represents a feature of the data.
+ - $Y$ - The target space. The set of predictable variables. Typically, for regression problems, $Y \subseteq \mathbb{R}^m$, while for classification problems, $Y$ is a set of classes such as $\{ \text{cat}, \text{dog}, \text{bird}, ... \}$.
+ - $n$ - The number of observations in the dataset.
+ - $\mathcal{X} = \{ x_i \in X \}_{i=1}^n$ - The set of features of the dataset.
+ - $\mathcal{Y} = \{ y_i \in Y \}_{i=1}^n$ - The set of target values of the dataset.
+ - $\mathcal{D} = \mathcal{X} \times \mathcal{Y} = \{ (x_i, y_i) \}_{i=1}^n$ - The dataset, comprised of the features and target values for each observation.
+ - $L: Y \times Y \rightarrow \mathbb{R}$ - The loss function, which measures how different are the predicted and actual target values. Later in this text, we will see that a differentiable loss function is preferred.
+
+ Putting everything together, we can define the goal of supervised learning as the estimated parameters or weights $w^*$ that minimize the loss function:
+
+$$
+w^* = \underset{w \in W}{\mathrm{argmin}}  \sum_{i=1}^n L(y_i, F(x_i; w))
+$$
+
+#### Overfitting
+
+Overfitting is a common problem in machine learning, where a model learns the data so well that it performs poorly on new, unseen data. To prevent overfitting, we first need to gauge if this is happening, which is done by splitting the data into a training set and a test set. Then the model is trained on the training set and evaluated on the test set. If the model performs poorly on the test set, it is likely overfitting. Another important technique to prevent overfitting is regularization, which adds a penalty term to the loss function to discourage complex models. So, our notation gets augmented as follows:
+
+ - $\mathcal{D}_{\text{train}}$ - The training set, a subset of $\mathcal{D}$ used to train the model.
+ - $\mathcal{D}_{\text{test}}$ - The test set, a subset of $\mathcal{D}$ used to evaluate the model.
+ - $C:W\leftarrow \mathbb{R}$ - The regularization function, which penalizes complex models.
+ - $\lambda \in \mathbb{R}$ - The regularization parameter, which controls the strength of the penalty.
+
+ Notes 
+ - $\mathcal{D}_{\text{train}}$ and $\mathcal{D}_{\text{test}}$ are a partition of $\mathcal{D}$. 
+ - Typically, $\mathcal{D}_{\text{train}}$ and $\mathcal{D}_{\text{test}}$ are chosen such that $|\mathcal{D}_{\text{test}}| \approx 0.2 |\mathcal{D}|$ and $|\mathcal{D}_{\text{train}}| \approx 0.8 |\mathcal{D}|$, although this ratio can be adjusted.
+ - We can have more than one regularization function and parameter, but we'll focus on notation with just one.
+
+ With this in mind, we can now define the loss function with regularization as follows:
+
+$$
+w^* = \underset{w \in W}{\mathrm{argmin}}  \sum_{(x,y) \in \mathcal{D}_{\text{train}}}  L(y, F(x; w)) + \lambda C(w)
+$$
+
+We also want the following to be true regardless of wether we are using a regularization function or not:
+$$
+\dfrac{1}{|\mathcal{D}_{\text{train}}|} \sum_{(x,y) \in \mathcal{D}_{\text{train}}}  L(y, F(x; w*)) \approx \dfrac{1}{|\mathcal{D}_{\text{test}}|} \sum_{(x,y) \in \mathcal{D}_{\text{test}}}  L(y, F(x; w*))
+$$
+Where the RHS is the training loss or error, and the LHS is the test loss or error - we want them to be close.
+
+## Toolkit
+
+Throught this course, we'll use the python programming language, and the following libraries:
+
+ - `numPy` and `scipy` for general purpose mathematical operations.
+ - `matplotlib` and `seaborn` for plotting.
+ - `pandas` and `scikit-learn` for data manipulation.
+ - `scikit-learn` for machine learning algorithms and data sets.
+ - `pytorch` as a Neural Network framework and some mathematical operations.
+
+For an easy installation you can use the following terminal command:
+```bash
+pip install numpy scipy matplotlib seaborn pandas scikit-learn pytorch
+```
+
+#### PyTorch
+
+PyTorch is one of the most popular Neural Network frameworks, rivaled by TensorFlow. While TensorFlow is more popular in industry, pytorch is more popular in research. PyTorch exposes more of the underlying mechanisms of Neural Networks, making it a fantastic tool for learning the underlying concepts of Neural Networks. It is important to recognize that we can also expose these underlying mechanisms using the `keras` module form TensorFlow, but we will use PyTorch for this course.
+
+#### Scikit-Learn
+
+SciKit-Learn is a python library for machine learning. It provides a wide range of algorithms for classification, regression, clustering, dimensionality reduction, model selection, and preprocessing. It also provides a wide range of data sets for testing and benchmarking. While it will not be the main character in this course, it will come in handy when we branch off from Neural Networks and explore other machine learning techniques. 
+
+

@@ -1,0 +1,305 @@
+---
+includes:
+  in-header: ../metadata.yaml
+---
+
+# Multi-Layer Perceptron
+
+## Introduction
+
+The Multi-Layer Perceptron (MLP) is the most common type of neural network architecture. It consists of an input layer, one or more hidden layers, and an output layer. The MLP is a feedforward neural network, meaning that the data flows through the network in one direction, from the input layer to the output layer. A network that has one hidden layer is called a shallow network, while a network with more than one hidden layer is called a deep network.
+
+If we let $z^{(i)}, i = 0, \cdots, n+1$ indicate the layer values of a Multi-Layer Perceptron with $n$ hidden layers, then the following equations describe the MLP:
+
+- $z^{(0)} = x$, the input layer
+- $z^{(i)} = \sigma(W^{(i)}z^{(i-1)} + b^{(i)}), i = 1, \cdots, n+1$, the hidden and output layers
+    - Where $\sigma$ is an **activation function** for the $i^\text{th}$ layer
+    - $W^{(i)}$ is the weight matrix for the $i^\text{th}$ layer
+    - $b^{(i)}$ is the bias vector for the $i^\text{th}$ layer
+    - $W^{(i)}z^{(i-1)} + b^{(i)}$ is the linear transformation of the previous layer, also known as a **fully connected layer**.
+- $z^{(n+1)} = y$, the output layer
+
+We can observe that each layer is a linear transformation of the previous followed by an activation function. The following diagram better illustrates the MLP:
+
+![Multi-Layer Perceptron Diagram](figures/MLP-diagram.png)
+
+#### Activation Functions
+
+The activation function is responsible for introducing non-linearity into the network, allowing it to learn complex patterns. Common activation functions include:
+
+Component-Wise activation Functions (the activated value depends on a single value):
+
+- **Sigmoid**: $\sigma(x) = \frac{1}{1 + e^{-x}}$
+- **Tanh**: $\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$
+- **ReLU**: $\operatorname{ReLU}(x) = \max(0, x)$
+- **Leaky ReLU**: $f(x) = \max(0, x) + \alpha \min(0, x)$, where $\alpha$ is a small constant.
+
+Layer-wise activation Functions (the activated value depends on the whole layer or a subset of the layer):
+
+- **Softmax**: $\operatorname{softmax}(x)_i = \frac{e^{x_i}}{\sum_{j} e^{x_j}}$
+- **Maxpool**: $\operatorname{maxpool}(x) = \max(x)$, where $x \subseteq z^{(i)}$
+- **Normalize**: $\operatorname{normalize}(x) = \dfrac{x - \mu}{\sigma}$, where $\mu$ is the mean and $\sigma$ is the standard deviation of $x$.
+    - Normalize can be layer-wise or batch-wise. Layer-wise normalization normalizes the values of the layer of a single input. While batch-wise normalization normalizes the values of the layer for a batch of inputs, where each component of the layer gets normalized batch-wise independently.
+- **Dropout**: $\Big( \operatorname{dropout}(x) \Big)_i = \begin{cases} 0 & \text{with probability } p, \\ x_i & \text{with probability } 1 - p.\end{cases}$. That is, each element of the input is either dropped (set to 0) with a probability of $p$ or kept with probability $1-p$.
+
+There are many other activation functions, but these are the most common ones. Without activation functions, neural networks would be equivalent to linear regression models, and they would not be able to learn complex patterns. Therefore, activation functions are an essential component of neural networks. Choosing the right activation function for a given task is an art rather than a science, but the $\
+
+## Universal Function Aproximator
+
+The major reason why neural networks are so powerful is that they can be used as a universal function approximator. This means that they can approximate any function to arbitraty precision, given enough layers and neurons. To illustrate this property, we'll focus on the $\operatorname{ReLU}$ activation function. 
+
+To begin, we'll need to accept that continuous functions on an arbitrary interval $[\beta_1, \beta_{N+1}]$ can be aproximated by a piecewise linear function to an arbitrary level of precision, given enough pieces. That is, we can approximate any function $f(x)$ by a function, $F(x)$ of the form:
+
+$$
+F(x) =
+\begin{cases} 
+f(\beta_1) + \alpha_1(x-\beta_1) & \text{if } x \in [\beta_1, \beta_2], \\
+f(\beta_2) + \alpha_2(x-\beta_2) & \text{if } x \in [\beta_2, \beta_3], \\
+\vdots & \vdots \\
+f(\beta_N) + \alpha_N(x-\beta_N) & \text{if } x \in [\beta_N, \beta_{N+1}]
+\end{cases}
+$$
+
+Then, we can re-write it as 
+$$
+F(x) = f(\beta_1) + \alpha_1 x + \sum_{i=2}^{N} (\alpha_i - \alpha_{i-1}) \operatorname{ReLU}(x - \beta_i).
+$$
+
+ This represents a shallow network with a hidden layer with $N$ neurons. This means that with a shallow network, we can approximate any function to an arbitrary level of precision. 
+
+However, it might not always be feasible to use a shallow network to approximate thousands or even millions of pieces for more complex functions. Deep Networks are a way to overcome this problem by using multiple hidden layers. This allows us to approximate functions with a much smaller number of pieces, which is more resource efficient. Regardless, there's always a trade-off between the number of parameters in the network and the precision of the aproximation.
+
+
+## PyTorch
+
+PyTorch let's us create a shallow network with an arbitrary number of input, hidden, and output neurons as follows:
+
+```{python}
+import torch
+import torch.nn as nn
+
+class ShallowNetwork(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(ShallowNetwork, self).__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(input_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, output_size),
+        )
+
+    def forward(self, x):
+        output = self.layers(x)
+        return output
+```
+
+To test the universality of the shallow network, let's consider the function $f(t) = \dfrac{5t^2 -3t+1}{6t^2+4t+1}$ on the interval $[0,5]$.
+```{python}
+#| echo: false
+import matplotlib.pyplot as plt
+
+t = torch.linspace(0,5, 100_000)
+f = ( 5*t ** 2 - 3*t + 1 ) / ( 6*t ** 2 + 4*t + 1)
+
+plt.plot(t,f)
+plt.show()
+```
+
+
+```{python}
+class DeepNetwork(nn.Module):
+    def __init__(self, input_size, hidden_size1, hidden_size2, output_size):
+        super(DeepNetwork, self).__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(input_size, hidden_size1),
+            nn.ReLU(),
+            nn.Linear(hidden_size1, hidden_size2),
+            nn.ReLU(),
+            nn.Linear(hidden_size2, output_size),
+        )
+
+    def forward(self, x):
+        output = self.layers(x)
+        return output
+```
+
+In a previous course we were able to recontruct the function using data fitting, but we needed prior knowledge of the function. Let's see if we can do it without any prior knowledge using a shallow network with 10, 100, and 1000 neurons in the hidden layer. Deep networks with hidden layers of size (10, 10) and (32, 32) are also included to compare depth vs width. 
+
+The networks are defined below:
+```{python}
+model10 = ShallowNetwork(1,10,1)
+model100 = ShallowNetwork(1,100,1)
+model1000 = ShallowNetwork(1,1000,1)
+model10_10 = DeepNetwork(1,10,10,1)
+model_32_32 = DeepNetwork(1,32,32,1)
+```
+
+After training the networks, we can plot the results and see how well the networks fit the data. Later sections will explain how to train a neural network, for now we'll focus on the results.
+```{python format-data, echo=FALSE, results='hide'}
+#| echo: false
+from sklearn.model_selection import train_test_split
+from torch.utils.data import TensorDataset, DataLoader
+DEVICE = (
+    "cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
+    else "cpu"
+)
+
+# reshaping the data
+matrix_t = t.reshape((-1,1)).to(DEVICE)
+matrix_f = f.reshape((-1,1)).to(DEVICE)
+
+# creating a test / train dataset
+t_train, t_test, f_train, f_test = train_test_split(matrix_t, matrix_f, test_size=.2, random_state=42)
+
+# packaging the data into a TensorDataset
+train_data = TensorDataset(t_train, f_train)
+```
+
+```{python train-models, echo=FALSE, results='hide'}
+#| echo: false
+import os
+
+def train(model, model_name):
+
+    model.to(DEVICE)
+    # load the model if it exists
+    if os.path.isfile(f"models/{model_name}.pth"):
+        model.load_state_dict(torch.load(f"models/{model_name}.pth", weights_only=False))
+
+        return
+
+    # network hyperparameters
+    learning_rate = 1e-3
+    batch_size = 1000
+    epochs = 100
+
+    # training objects
+    train_dataloader = DataLoader(train_data, batch_size=batch_size)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    criterion = torch.nn.MSELoss()
+
+    model.train()
+
+    for epoch in range(epochs):
+        for ti, fi in train_dataloader:
+            # Compute prediction
+            pred = model(ti)
+
+            # calculate loss
+            loss = criterion(pred, fi)
+
+            # Backpropagation
+            loss.backward() # set gradient function
+            optimizer.step() # apply back propagation
+            optimizer.zero_grad() # zero out gradient
+
+    # save model
+    torch.save(model.state_dict(), f"models/{model_name}.pth")
+
+train(model10, "model10")
+train(model100, "model100")
+train(model1000, "model1000")
+train(model10_10, "model10_10")
+train(model_32_32, "model_32_32")
+```
+
+```{python plot-models, echo=FALSE}
+#| echo: false
+order = torch.argsort(t_test.flatten())
+
+t_test = t_test[order]
+f_test = f_test[order]
+
+order = torch.argsort(t_train.flatten())
+
+t_train = t_train[order]
+f_train = f_train[order]
+
+model10 = model10.eval()
+model100 = model100.eval()
+model1000 = model1000.eval()
+model10_10 = model10_10.eval()
+model_32_32 = model_32_32.eval()
+
+f_hat_10    = model10(t_test).detach().cpu()
+f_hat_100   = model100(t_test).detach().cpu()
+f_hat_1000  = model1000(t_test).detach().cpu()
+f_hat_10_10 = model10_10(t_test).detach().cpu()
+f_hat_32_32 = model_32_32(t_test).detach().cpu()
+
+f_hat_train_10    = model10(t_train).detach().cpu()
+f_hat_train_100   = model100(t_train).detach().cpu()
+f_hat_train_1000  = model1000(t_train).detach().cpu()
+f_hat_train_10_10 = model10_10(t_train).detach().cpu()
+f_hat_train_32_32 = model_32_32(t_train).detach().cpu()
+
+t_test      = t_test.detach().cpu()
+f_test      = f_test.detach().cpu()
+t_train     = t_train.detach().cpu()
+f_train     = f_train.detach().cpu()
+
+plt.plot(t_test, f_test, label="True function")
+plt.plot(t_test, f_hat_10, label="10 neurons")
+plt.plot(t_test, f_hat_100, label="100 neurons")
+plt.plot(t_test, f_hat_1000, label="1000 neurons")
+plt.plot(t_test, f_hat_10_10, label="10x10 neurons")
+plt.plot(t_test, f_hat_32_32, label="32x32 neurons")
+plt.legend()
+plt.show()
+```
+
+They all aproximate the function pretty well, however this makes it hard to tell them appart. Instead let's look at the error for each model.
+
+```{python model-errors}
+#| echo: false
+
+import pandas as pd
+import seaborn as sns
+from torch.nn.functional import mse_loss
+
+labels = ['10 neurons', '100 neurons', '1000 neurons', '10x10 neurons', '32x32 neurons']
+
+train_errors = [
+    mse_loss(f_hat_train_10, f_train).item(),
+    mse_loss(f_hat_train_100, f_train).item(),
+    mse_loss(f_hat_train_1000, f_train).item(),
+    mse_loss(f_hat_train_10_10, f_train).item(),
+    mse_loss(f_hat_train_32_32, f_train).item(),
+]
+
+test_errors = [
+    mse_loss(f_hat_10, f_test).item(),
+    mse_loss(f_hat_100, f_test).item(),
+    mse_loss(f_hat_1000, f_test).item(),
+    mse_loss(f_hat_10_10, f_test).item(),
+    mse_loss(f_hat_32_32, f_test).item(),
+]
+
+data = {
+    'Model': labels,
+    'Train Error': train_errors,
+    'Test Error': test_errors,
+}
+
+df = pd.DataFrame(data)
+
+# Melt the DataFrame for seaborn
+df_melted = df.melt(id_vars='Model', var_name='Dataset', value_name='MSE')
+
+
+sns.catplot(x = 'Model', y='MSE', 
+               hue = 'Dataset', data=df_melted, kind='bar')
+plt.title('Train and Test Errors for each model')
+plt.xlabel('Neural Network Architecture')
+plt.ylabel('Mean Squared Error (MSE)')
+plt.tight_layout()
+plt.show()
+```
+
+We can see that the error doesn't necesarily decrease as the number of neurons increases. The shallow network with just 100 neurons has the lowest error, while the network with 1000 neurons has the second highest error. Sometimes, adding more neurons can actually increase the error. There are many possible reasons for this, which are discussed in a later section. 
+
+----
+
+Neural Networks are a very powerful tool when trying to estimate the underlying function of a dataset. Finding the right architecture for a neural network can be a difficult task, and is often a trial and error process. Regardless, they have a high estimation potential, but good practices are needed to harness their full power.
