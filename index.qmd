@@ -20,14 +20,14 @@ This is a collection of the knowledge I have accumulated accumulated over an ind
 3. [Good practices for Neural Networks](chapter%202/GoodPractices.html)
 4. [Convolutional Neural Networks](chapter%202/ConvolutionalNN.html)
 5. [Autoencoders](chapter%202/Autoencoders.html)
-6. ~~Recurrent Neural Networks and beyond~~
+6. ~~Recurrent Neural Networks and Beyond~~
 
 ### Chapter 3 - Other Machine Learning Topics
 
 1. [Decision Trees](chapter%203/CART.html)
 2. [Ensemble Methods](chapter%203/ensemble.html)
-3. Gaussian Mixture Models
+3. [Gaussian Mixture Models](chapter%203/GausianMixture.html)
 
 Note that this isn't my first time dealing with machine learning, as such some of the more basic topics are not covered in detail or outright omitted.
 
-For time constraints the section about Recurrent Neural Networks is not available yet.
+For time constraints the section about Recurrent Neural Networks, LSTM and Transformers are not available yet.

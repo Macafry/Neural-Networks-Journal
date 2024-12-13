@@ -43,6 +43,10 @@ The following diagram shows a bagging process with 3 base models: KNN, SVM, and 
 
 ![](figures/voting-1.png){fig-align="center" width="60%"}
 
+#### Limitation
+
+One distadvantage of bagging is that it is slower to train than a single model. Also, a bagging model can only be as good as the best base model. This are some limitations to consider when using bagging - the limits of the model become the limits of the bagging model.
+
 ## Boosting
 
 **Boosting** is a sequential ensemble method where each model is trained to correct the errors of the previous model. The first model is trained on the original data, and the second model is trained on the data where the errors of the first model are emphasized via weighted bootstrapping. This process continues until a stopping criterion is met. The final prediction is made by combining the predictions of all the models using a weighted sum. The weights are determined by the performance of each model on the training data.
@@ -144,6 +148,355 @@ Now each model acts as a one vs all model. The first model predicts if the label
 
 ## Not PyTorch
 
+Here I'll show the results of the ensemble models I trained with data I used through the semester. The dataset for Bagging is a 10-dimensional latent space of the MNIST dataset, obtained through a variational autoencoder. The dataset for Stacking is the base CIFAR-10 dataset.
+
 #### Bagging
 
+To classify my latent space of the MNIST dataset, I used 5 instances of several classification models I've learned throughout my career + the ensemble tree models:
+
+**Previous models:**
+
+- Logistic Regression
+- K-Nearest Neighbors
+- Support Vector Machine
+- Naive Bayes
+- MLP Classifier
+
+**Ensemble models:**
+
+- Random Forest
+- AdaBoost
+- Gradient Boosting
+
+Fortunately, Scikit-Learn implements all of these models, and a Voting ensembler. With prior bootstrapping of the data, I could aggregate all models into a single Bagging model. Note that I used some very wishiy-washy parameter tuning for the models, but I wanted to keep the code as simple as possible. Also, I wouldnt use a bagging model with any of the ensemble models, as the parameter tuning for these can be very time-consuming and it adds a second layer of bootstrapping. 
+
+
+```{python}
+#| code-fold: true
+#| code-summary: "Libraries and data"
+#| cache: true
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import VotingClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
+from SckitLearnWrapper import SckitLearnWrapper, get_all_model_names
+
+X_train = np.loadtxt('data/train_data.csv', delimiter=',')
+y_train = np.loadtxt('data/train_labels.csv', delimiter=',')
+X_test = np.loadtxt('data/test_data.csv', delimiter=',')
+y_test = np.loadtxt('data/test_labels.csv', delimiter=',')
+```
+
+I had to use some questionable code to aggregate the models into the `VotingClassifier` class. The `ScikitLearnWrapper` class is a wrapper that handles the bootstrapping, training, parameter tuning, and saving/loading of the models. It can be found in the `SckitLearnWrapper.py` file in the github repository.
+
+```{python}
+#| cache: true
+
+# dummy models used to train the voting classifier
+dummy_models = [
+    ('dummy1', KNeighborsClassifier()), 
+    ('dummy2', KNeighborsClassifier())
+]
+
+# train real models that will be hijacked into the voting classifier
+# formatted in the shape the voting classifier expects
+# list[(name: str, model)]
+models = [
+    (f'{model}_{i}', SckitLearnWrapper(model, i, X_train, y_train).train('models/'))
+    for model in get_all_model_names()
+    for i in range(5)
+]
+
+# train with dummy models
+bagger = VotingClassifier(estimators=dummy_models, voting='soft')
+bagger.fit(X_train, y_train)
+
+# assign pre-trained models
+bagger.estimators = models
+```
+
+Now that the Bagger is trained, we can use it to predict the labels of the test. Let's take a look at the confusion matrix and the accuracy score of the Bagger model:
+
+```{python}
+#| code-fold: true
+#| code-summary: "Confusion Matrix and accuracy score"
+#| fig-align: center
+#| cache: true
+
+y_pred = bagger.predict(X_test)
+
+cm = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot(cmap=plt.cm.Blues, 
+          text_kw={'fontsize': 8, 'ha': 'center', 'va': 'center'})
+
+# Format numbers as integers without scientific notation
+for text in disp.text_.ravel():
+    text.set_text(f'{int(float(text.get_text()))}')
+
+plt.title('Confusion Matrix')
+plt.show()
+
+# compute accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy}")
+```
+
+As we can observe, the Bagger model did pretty well. Let's take a look at how each of the models performed individually:
+
+```{python}
+#| code-fold: true
+#| code-summary: "Accuracy of each model"
+#| fig-align: center
+#| cache: true
+
+# get a list with all the models
+all_models = [*models, ('Bagger_0', bagger)]
+
+# make that list into a dataframe with the model name, model type, model index, and accuracy
+accuracies = pd.DataFrame({
+    'name': name,
+    'model_type': name.split('_')[0],
+    'model_index': name.split('_')[1],
+    'accuracy': accuracy_score(y_test, model.predict(X_test)),
+} for name, model in all_models)
+
+# Show the accuracies from highest to lowest
+accuracies.sort_values('accuracy', ascending=False)
+```
+
+While it wasn't the best, the Bagger model managed to get the third highest accuracy without any insight about model performance! Let's also take a look at the average accuracy of each model type:
+
+```{python}
+#| code-fold: true
+#| code-summary: "Average accuracy of each model type"
+#| fig-align: center
+#| cache: true
+
+# group the accuracies by model type and compute the mean
+pd.DataFrame(
+    accuracies.groupby('model_type') \
+              .accuracy.mean()\
+              .sort_values(ascending=False) \
+              .reset_index() \
+              .rename(columns={'index': 'model_type'})
+)
+```
+
+Now, the Bagger model is the clear winner! Hopefully this shows that bagging is a very powerful technique for improving the performance of a model.
+
 #### Stacking
+
+To classify the images of the CIFAR-10 dataset, I used the described architecture in the [stacking segment](#stacking) of this section. 
+
+```{python}
+#| code-fold: true
+#| code-summary: "More libraries and data"
+
+import os
+import torch
+import torch.nn as nn
+from torchvision import datasets, transforms
+
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    transforms.RandomAffine(degrees=(-10, 10)),
+])
+
+train_data = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+test_data = datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
+
+
+items, y_test = zip(*test_data)
+X_test = torch.stack(items)
+```
+
+The following is the architecure used of all the submodels of the stacking model. 
+
+```{python}
+class CIFAR10Classifier(nn.Module):
+    def __init__(self, n_classes):
+        super(CIFAR10Classifier, self).__init__()
+        self.layers = nn.Sequential(
+            nn.Conv2d(3, 4, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(4, 8, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(8, 16, kernel_size=5, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(16, 16, kernel_size=5, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(16, 16, kernel_size=5, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Flatten(),
+            nn.Linear(256, 64),
+            nn.ReLU(),
+            nn.Linear(64, n_classes)
+        )
+        
+    def forward(self, x):
+        x = self.layers(x)
+        return x
+```
+
+This metaclass approach requires a significant amount of boilerplate code to train the models. However, for brevity sake, I'll just load the pre-trained models and use them for prediction. The omitted code can be found in the `Stacking.ipynb` file in the repository.
+
+```{python}
+#| code-fold: true
+#| code-summary: "Load pre-trained models"
+
+# model 1: meta class predictor
+meta_model = CIFAR10Classifier(3)
+meta_model.load_state_dict(torch.load('models2/model_meta.pth', weights_only=False))
+
+# model 2: vehicle predictor
+submodel_1 = CIFAR10Classifier(5)
+submodel_1.load_state_dict(torch.load('models2/model_meta_class_0.pth', weights_only=False))
+
+# model 3: general animal predictor
+submodel_2= CIFAR10Classifier(5)
+submodel_2.load_state_dict(torch.load('models2/model_meta_class_1.pth', weights_only=False))
+
+# model 3: cat-dog predictor
+submodel_3= CIFAR10Classifier(3)
+submodel_3.load_state_dict(torch.load('models2/model_meta_class_2.pth', weights_only=False))
+
+# model 5: catch-all predictor
+catchall_model = CIFAR10Classifier(10)
+catchall_model.load_state_dict(torch.load('models2/model_general.pth', weights_only=False))
+```
+
+Then, we can use the following function to predict the class of an image using the ensemble of models. The arguments of the functions go as follows:
+
+- `meta_model`: the meta-classifier model
+- `sub_models`: a list containitng the sub-classifier models
+- `general_model`: the general catch all classifier model
+- `input_images`: the input images
+- `sub_prediction_maps`: mapping between sub-classifier labels and general class labels packed into a list of dictionaries: one for each of the submodels.
+
+
+```{python}
+def stacked_predictions(meta_model, 
+                        sub_models, 
+                        general_model, 
+                        input_images, 
+                        sub_prediction_maps):
+    # validate input
+    assert len(sub_models) == len(sub_prediction_maps)
+    
+    # eval mode
+    meta_model.eval()
+    general_model.eval()
+    
+    for submodel in sub_models:
+        submodel.eval()
+    
+    # predictions
+    with torch.no_grad():
+        
+        # predict metaclass
+        meta_features = meta_model(input_images).argmax(dim=1)
+        predictions = torch.zeros_like(meta_features)
+        
+        # predict subclasses
+        for k, submodel in enumerate(sub_models):
+            # predict the classes for the observations predicted to belong to this metaclass
+            mask = meta_features == k
+            sub_prediction = submodel(input_images[mask]).argmax(dim=1)
+            
+            # map the predictions to the general class labels
+            # use -1 to indicate that the metaclass prediction was predicted to be incorrect
+            prediction_map = sub_prediction_maps[k]
+            temp = [prediction_map.get(pred.item(), -1) for pred in sub_prediction]
+            predictions[mask] = torch.tensor(temp)
+
+        # correct incorrect metaclass predictions
+        # report the amount of incorrect predictions
+        incorrect_mask = predictions == -1
+        print(f"Incorrect predictions: {incorrect_mask.sum().item()}")
+        predictions[incorrect_mask] = general_model(input_images[incorrect_mask]).argmax(dim=1)
+
+    # return final predictions     
+    return predictions
+```
+
+Now, we can compare the performance of the ensemble model vs the general model:
+
+```{python}
+#| code-fold: true
+#| code-summary: "Confusion Matrix for the ensemble model"
+#| fig-align: center
+
+# predict
+y_pred = stacked_predictions(
+    meta_model=meta_model, 
+    sub_models=[submodel_1, submodel_2, submodel_3], general_model=catchall_model, 
+    input_images=X_test, 
+    sub_prediction_maps=[
+        {1:0, 2:1, 3:8, 4:9},
+        {1:2, 2:4, 3:6, 4:7},
+        {1:3, 2:5}, 
+    ],
+)
+
+# display confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+disp.plot(cmap=plt.cm.Blues, 
+          text_kw={'fontsize': 8, 'ha': 'center', 'va': 'center'})
+
+# Format numbers as integers without scientific notation
+for text in disp.text_.ravel():
+    text.set_text(f'{int(float(text.get_text()))}')
+
+plt.title('Confusion Matrix for Stacking Model')
+plt.show()
+
+# compute accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy}")
+```
+
+```{python}
+#| code-fold: true
+#| code-summary: "Confusion Matrix for the ensemble model"
+#| fig-align: center
+
+# predict
+y_pred = catchall_model(X_test).argmax(dim=1).detach()
+
+
+# display confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+disp.plot(cmap=plt.cm.Blues, 
+          text_kw={'fontsize': 8, 'ha': 'center', 'va': 'center'})
+
+# Format numbers as integers without scientific notation
+for text in disp.text_.ravel():
+    text.set_text(f'{int(float(text.get_text()))}')
+
+plt.title('Confusion Matrix for single CNN Model')
+plt.show()
+
+# compute accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy}")
+```
+
+As we can observer, the stacked model slightly outperforms the single CNN model. However, this is not always the case, it varied depending on the number of epochs. This is a nitpicked example to show that Stacking models _can_ outperform single models.
+
+----
+
+Ensemble models is a different paradigm form the ones we have seen so far. It is a way to combine multiple models to create a single model that is more robust and accurate than any of the individual models.
+

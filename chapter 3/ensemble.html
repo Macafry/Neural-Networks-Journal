@@ -20,10 +20,44 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="ensemble_files/libs/clipboard/clipboard.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="ensemble_files/libs/clipboard/clipboard.min.js"></script>
 <script src="ensemble_files/libs/quarto-html/quarto.js"></script>
 <script src="ensemble_files/libs/quarto-html/popper.min.js"></script>
 <script src="ensemble_files/libs/quarto-html/tippy.umd.min.js"></script>
@@ -33,6 +67,9 @@ ul.task-list li input[type="checkbox"] {
 <script src="ensemble_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="ensemble_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="ensemble_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -72,11 +109,25 @@ window.Quarto = {
 
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Ensemble Methods</h1>
+</div>
 
 
 
-<section id="ensemble-methods" class="level1">
-<h1>Ensemble Methods</h1>
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <p>So far we’ve looked at a number of different machine learning algorithms. The one thing all these algorithms have in common is that they are all <strong>Strong learners</strong>. A strong learner is a model that is able to reach an arbitrary level of precision given enough resources and data. In contrast, a <strong>weak learner</strong> is a model that is just slightly better than random guessing. For example, a weak learner might be able to correctly classify 55% of the time, while a strong learner might be able to correctly classify 95% of the time. The basic idea behind ensemble methods is to combine multiple weak learners into a single strong learner.</p>
 <p>This paradigm is akin to asking a crowd of people to guess the number of jelly beans in a jar, then taking the average as our final answer. The hope is that the average of the guesses will be more accurate than any single guess. I first saw this in a video, but was unable to find it again.</p>
 <p>This section assumes the reader is familiar with decision trees as most ensemble methods are based on decision trees. If you are unfamiliar with decision trees, I recommend reading the <a href="./CART.html">Decision Trees section</a>.</p>
@@ -118,6 +169,10 @@ window.Quarto = {
 <p><img src="figures/voting-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></p>
 </figure>
 </div>
+</section>
+<section id="limitation" class="level4">
+<h4 class="anchored" data-anchor-id="limitation">Limitation</h4>
+<p>One distadvantage of bagging is that it is slower to train than a single model. Also, a bagging model can only be as good as the best base model. This are some limitations to consider when using bagging - the limits of the model become the limits of the bagging model.</p>
 </section>
 </section>
 <section id="boosting" class="level2">
@@ -219,12 +274,769 @@ M_{i+1}(x) = M_i(x) - \hat{\gamma}_{i+1} m_{i+1}(x)
 </section>
 <section id="not-pytorch" class="level2">
 <h2 class="anchored" data-anchor-id="not-pytorch">Not PyTorch</h2>
+<p>Here I’ll show the results of the ensemble models I trained with data I used through the semester. The dataset for Bagging is a 10-dimensional latent space of the MNIST dataset, obtained through a variational autoencoder. The dataset for Stacking is the base CIFAR-10 dataset.</p>
 <section id="bagging-1" class="level4">
 <h4 class="anchored" data-anchor-id="bagging-1">Bagging</h4>
+<p>To classify my latent space of the MNIST dataset, I used 5 instances of several classification models I’ve learned throughout my career + the ensemble tree models:</p>
+<p><strong>Previous models:</strong></p>
+<ul>
+<li>Logistic Regression</li>
+<li>K-Nearest Neighbors</li>
+<li>Support Vector Machine</li>
+<li>Naive Bayes</li>
+<li>MLP Classifier</li>
+</ul>
+<p><strong>Ensemble models:</strong></p>
+<ul>
+<li>Random Forest</li>
+<li>AdaBoost</li>
+<li>Gradient Boosting</li>
+</ul>
+<p>Fortunately, Scikit-Learn implements all of these models, and a Voting ensembler. With prior bootstrapping of the data, I could aggregate all models into a single Bagging model. Note that I used some very wishiy-washy parameter tuning for the models, but I wanted to keep the code as simple as possible. Also, I wouldnt use a bagging model with any of the ensemble models, as the parameter tuning for these can be very time-consuming and it adds a second layer of bootstrapping.</p>
+<div id="f8c40731" class="cell" data-cache="true" data-execution_count="1">
+<details class="code-fold">
+<summary>Libraries and data</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> KNeighborsClassifier</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> VotingClassifier</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score, confusion_matrix, ConfusionMatrixDisplay</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> SckitLearnWrapper <span class="im">import</span> SckitLearnWrapper, get_all_model_names</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> np.loadtxt(<span class="st">'data/train_data.csv'</span>, delimiter<span class="op">=</span><span class="st">','</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> np.loadtxt(<span class="st">'data/train_labels.csv'</span>, delimiter<span class="op">=</span><span class="st">','</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> np.loadtxt(<span class="st">'data/test_data.csv'</span>, delimiter<span class="op">=</span><span class="st">','</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> np.loadtxt(<span class="st">'data/test_labels.csv'</span>, delimiter<span class="op">=</span><span class="st">','</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>I had to use some questionable code to aggregate the models into the <code>VotingClassifier</code> class. The <code>ScikitLearnWrapper</code> class is a wrapper that handles the bootstrapping, training, parameter tuning, and saving/loading of the models. It can be found in the <code>SckitLearnWrapper.py</code> file in the github repository.</p>
+<div id="bc051cdb" class="cell" data-cache="true" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># dummy models used to train the voting classifier</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>dummy_models <span class="op">=</span> [</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'dummy1'</span>, KNeighborsClassifier()), </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'dummy2'</span>, KNeighborsClassifier())</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># train real models that will be hijacked into the voting classifier</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># formatted in the shape the voting classifier expects</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># list[(name: str, model)]</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> [</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    (<span class="ss">f'</span><span class="sc">{</span>model<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">'</span>, SckitLearnWrapper(model, i, X_train, y_train).train(<span class="st">'models/'</span>))</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> model <span class="kw">in</span> get_all_model_names()</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># train with dummy models</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>bagger <span class="op">=</span> VotingClassifier(estimators<span class="op">=</span>dummy_models, voting<span class="op">=</span><span class="st">'soft'</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>bagger.fit(X_train, y_train)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># assign pre-trained models</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>bagger.estimators <span class="op">=</span> models</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now that the Bagger is trained, we can use it to predict the labels of the test. Let’s take a look at the confusion matrix and the accuracy score of the Bagger model:</p>
+<div id="41400bc7" class="cell" data-cache="true" data-execution_count="3">
+<details class="code-fold">
+<summary>Confusion Matrix and accuracy score</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> bagger.predict(X_test)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> ConfusionMatrixDisplay(confusion_matrix<span class="op">=</span>cm)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>disp.plot(cmap<span class="op">=</span>plt.cm.Blues, </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>          text_kw<span class="op">=</span>{<span class="st">'fontsize'</span>: <span class="dv">8</span>, <span class="st">'ha'</span>: <span class="st">'center'</span>, <span class="st">'va'</span>: <span class="st">'center'</span>})</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Format numbers as integers without scientific notation</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> text <span class="kw">in</span> disp.text_.ravel():</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    text.set_text(<span class="ss">f'</span><span class="sc">{</span><span class="bu">int</span>(<span class="bu">float</span>(text.get_text()))<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Confusion Matrix'</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co"># compute accuracy</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>accuracy <span class="op">=</span> accuracy_score(y_test, y_pred)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Accuracy: </span><span class="sc">{</span>accuracy<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ensemble_files/figure-html/cell-4-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="513" height="449"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy: 0.9569</code></pre>
+</div>
+</div>
+<p>As we can observe, the Bagger model did pretty well. Let’s take a look at how each of the models performed individually:</p>
+<div id="fc85b55c" class="cell" data-cache="true" data-execution_count="4">
+<details class="code-fold">
+<summary>Accuracy of each model</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get a list with all the models</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>all_models <span class="op">=</span> [<span class="op">*</span>models, (<span class="st">'Bagger_0'</span>, bagger)]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># make that list into a dataframe with the model name, model type, model index, and accuracy</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>accuracies <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'name'</span>: name,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'model_type'</span>: name.split(<span class="st">'_'</span>)[<span class="dv">0</span>],</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'model_index'</span>: name.split(<span class="st">'_'</span>)[<span class="dv">1</span>],</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'accuracy'</span>: accuracy_score(y_test, model.predict(X_test)),</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>} <span class="cf">for</span> name, model <span class="kw">in</span> all_models)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the accuracies from highest to lowest</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>accuracies.sort_values(<span class="st">'accuracy'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="58">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">model_type</th>
+<th data-quarto-table-cell-role="th">model_index</th>
+<th data-quarto-table-cell-role="th">accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">16</td>
+<td>RBF_1</td>
+<td>RBF</td>
+<td>1</td>
+<td>0.9582</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">43</td>
+<td>MLPClassifier_3</td>
+<td>MLPClassifier</td>
+<td>3</td>
+<td>0.9571</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">45</td>
+<td>Bagger_0</td>
+<td>Bagger</td>
+<td>0</td>
+<td>0.9569</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">15</td>
+<td>RBF_0</td>
+<td>RBF</td>
+<td>0</td>
+<td>0.9565</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">18</td>
+<td>RBF_3</td>
+<td>RBF</td>
+<td>3</td>
+<td>0.9563</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">17</td>
+<td>RBF_2</td>
+<td>RBF</td>
+<td>2</td>
+<td>0.9561</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">19</td>
+<td>RBF_4</td>
+<td>RBF</td>
+<td>4</td>
+<td>0.9557</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">40</td>
+<td>MLPClassifier_0</td>
+<td>MLPClassifier</td>
+<td>0</td>
+<td>0.9555</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">41</td>
+<td>MLPClassifier_1</td>
+<td>MLPClassifier</td>
+<td>1</td>
+<td>0.9553</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">42</td>
+<td>MLPClassifier_2</td>
+<td>MLPClassifier</td>
+<td>2</td>
+<td>0.9545</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">44</td>
+<td>MLPClassifier_4</td>
+<td>MLPClassifier</td>
+<td>4</td>
+<td>0.9537</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">25</td>
+<td>KNeighborsClassifier_0</td>
+<td>KNeighborsClassifier</td>
+<td>0</td>
+<td>0.9533</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">27</td>
+<td>KNeighborsClassifier_2</td>
+<td>KNeighborsClassifier</td>
+<td>2</td>
+<td>0.9527</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">28</td>
+<td>KNeighborsClassifier_3</td>
+<td>KNeighborsClassifier</td>
+<td>3</td>
+<td>0.9510</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">26</td>
+<td>KNeighborsClassifier_1</td>
+<td>KNeighborsClassifier</td>
+<td>1</td>
+<td>0.9509</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">29</td>
+<td>KNeighborsClassifier_4</td>
+<td>KNeighborsClassifier</td>
+<td>4</td>
+<td>0.9503</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9</td>
+<td>RandomForestClassifier_4</td>
+<td>RandomForestClassifier</td>
+<td>4</td>
+<td>0.9353</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>RandomForestClassifier_0</td>
+<td>RandomForestClassifier</td>
+<td>0</td>
+<td>0.9349</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>RandomForestClassifier_3</td>
+<td>RandomForestClassifier</td>
+<td>3</td>
+<td>0.9347</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">6</td>
+<td>RandomForestClassifier_1</td>
+<td>RandomForestClassifier</td>
+<td>1</td>
+<td>0.9340</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">7</td>
+<td>RandomForestClassifier_2</td>
+<td>RandomForestClassifier</td>
+<td>2</td>
+<td>0.9339</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">13</td>
+<td>SVM_3</td>
+<td>SVM</td>
+<td>3</td>
+<td>0.9335</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">11</td>
+<td>SVM_1</td>
+<td>SVM</td>
+<td>1</td>
+<td>0.9332</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">14</td>
+<td>SVM_4</td>
+<td>SVM</td>
+<td>4</td>
+<td>0.9331</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">10</td>
+<td>SVM_0</td>
+<td>SVM</td>
+<td>0</td>
+<td>0.9320</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">12</td>
+<td>SVM_2</td>
+<td>SVM</td>
+<td>2</td>
+<td>0.9320</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">31</td>
+<td>GradientBoostingClassifier_1</td>
+<td>GradientBoostingClassifier</td>
+<td>1</td>
+<td>0.9122</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">32</td>
+<td>GradientBoostingClassifier_2</td>
+<td>GradientBoostingClassifier</td>
+<td>2</td>
+<td>0.9098</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">33</td>
+<td>GradientBoostingClassifier_3</td>
+<td>GradientBoostingClassifier</td>
+<td>3</td>
+<td>0.9089</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">30</td>
+<td>GradientBoostingClassifier_0</td>
+<td>GradientBoostingClassifier</td>
+<td>0</td>
+<td>0.9077</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">34</td>
+<td>GradientBoostingClassifier_4</td>
+<td>GradientBoostingClassifier</td>
+<td>4</td>
+<td>0.9068</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">23</td>
+<td>LogisticRegression_3</td>
+<td>LogisticRegression</td>
+<td>3</td>
+<td>0.9055</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">22</td>
+<td>LogisticRegression_2</td>
+<td>LogisticRegression</td>
+<td>2</td>
+<td>0.9053</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">20</td>
+<td>LogisticRegression_0</td>
+<td>LogisticRegression</td>
+<td>0</td>
+<td>0.9039</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">21</td>
+<td>LogisticRegression_1</td>
+<td>LogisticRegression</td>
+<td>1</td>
+<td>0.9037</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">24</td>
+<td>LogisticRegression_4</td>
+<td>LogisticRegression</td>
+<td>4</td>
+<td>0.9031</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>GaussianNB_3</td>
+<td>GaussianNB</td>
+<td>3</td>
+<td>0.8867</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">0</td>
+<td>GaussianNB_0</td>
+<td>GaussianNB</td>
+<td>0</td>
+<td>0.8863</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>GaussianNB_2</td>
+<td>GaussianNB</td>
+<td>2</td>
+<td>0.8861</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>GaussianNB_4</td>
+<td>GaussianNB</td>
+<td>4</td>
+<td>0.8859</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>GaussianNB_1</td>
+<td>GaussianNB</td>
+<td>1</td>
+<td>0.8857</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">37</td>
+<td>AdaBoostClassifier_2</td>
+<td>AdaBoostClassifier</td>
+<td>2</td>
+<td>0.7522</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">36</td>
+<td>AdaBoostClassifier_1</td>
+<td>AdaBoostClassifier</td>
+<td>1</td>
+<td>0.7351</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">38</td>
+<td>AdaBoostClassifier_3</td>
+<td>AdaBoostClassifier</td>
+<td>3</td>
+<td>0.7329</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">35</td>
+<td>AdaBoostClassifier_0</td>
+<td>AdaBoostClassifier</td>
+<td>0</td>
+<td>0.7286</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">39</td>
+<td>AdaBoostClassifier_4</td>
+<td>AdaBoostClassifier</td>
+<td>4</td>
+<td>0.7196</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>While it wasn’t the best, the Bagger model managed to get the third highest accuracy without any insight about model performance! Let’s also take a look at the average accuracy of each model type:</p>
+<div id="e0d256ac" class="cell" data-cache="true" data-execution_count="5">
+<details class="code-fold">
+<summary>Average accuracy of each model type</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># group the accuracies by model type and compute the mean</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    accuracies.groupby(<span class="st">'model_type'</span>) <span class="op">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>              .accuracy.mean()<span class="op">\</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>              .sort_values(ascending<span class="op">=</span><span class="va">False</span>) <span class="op">\</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>              .reset_index() <span class="op">\</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>              .rename(columns<span class="op">=</span>{<span class="st">'index'</span>: <span class="st">'model_type'</span>})</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="59">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">model_type</th>
+<th data-quarto-table-cell-role="th">accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Bagger</td>
+<td>0.95690</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>RBF</td>
+<td>0.95656</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>MLPClassifier</td>
+<td>0.95522</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>KNeighborsClassifier</td>
+<td>0.95164</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>RandomForestClassifier</td>
+<td>0.93456</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>SVM</td>
+<td>0.93276</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>GradientBoostingClassifier</td>
+<td>0.90908</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>LogisticRegression</td>
+<td>0.90430</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>GaussianNB</td>
+<td>0.88614</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9</td>
+<td>AdaBoostClassifier</td>
+<td>0.73368</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Now, the Bagger model is the clear winner! Hopefully this shows that bagging is a very powerful technique for improving the performance of a model.</p>
 </section>
 <section id="stacking-1" class="level4">
 <h4 class="anchored" data-anchor-id="stacking-1">Stacking</h4>
-</section>
+<p>To classify the images of the CIFAR-10 dataset, I used the described architecture in the <a href="#stacking">stacking segment</a> of this section.</p>
+<div id="8f7c13d0" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>More libraries and data</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> datasets, transforms</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>transform <span class="op">=</span> transforms.Compose([</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    transforms.ToTensor(),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    transforms.Normalize((<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>), (<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>)),</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    transforms.RandomAffine(degrees<span class="op">=</span>(<span class="op">-</span><span class="dv">10</span>, <span class="dv">10</span>)),</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>train_data <span class="op">=</span> datasets.CIFAR10(root<span class="op">=</span><span class="st">'./data'</span>, train<span class="op">=</span><span class="va">True</span>, download<span class="op">=</span><span class="va">True</span>, transform<span class="op">=</span>transform)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>test_data <span class="op">=</span> datasets.CIFAR10(root<span class="op">=</span><span class="st">'./data'</span>, train<span class="op">=</span><span class="va">False</span>, download<span class="op">=</span><span class="va">True</span>, transform<span class="op">=</span>transform)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>items, y_test <span class="op">=</span> <span class="bu">zip</span>(<span class="op">*</span>test_data)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> torch.stack(items)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Files already downloaded and verified
+Files already downloaded and verified</code></pre>
+</div>
+</div>
+<p>The following is the architecure used of all the submodels of the stacking model.</p>
+<div id="db2af1cc" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CIFAR10Classifier(nn.Module):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, n_classes):</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(CIFAR10Classifier, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layers <span class="op">=</span> nn.Sequential(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">3</span>, <span class="dv">4</span>, kernel_size<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">4</span>, <span class="dv">8</span>, kernel_size<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            nn.MaxPool2d(kernel_size<span class="op">=</span><span class="dv">2</span>, stride<span class="op">=</span><span class="dv">2</span>),</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">8</span>, <span class="dv">16</span>, kernel_size<span class="op">=</span><span class="dv">5</span>, stride<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">16</span>, <span class="dv">16</span>, kernel_size<span class="op">=</span><span class="dv">5</span>, stride<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>            nn.MaxPool2d(kernel_size<span class="op">=</span><span class="dv">2</span>, stride<span class="op">=</span><span class="dv">2</span>),</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">16</span>, <span class="dv">16</span>, kernel_size<span class="op">=</span><span class="dv">5</span>, stride<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="dv">1</span>),</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            nn.Flatten(),</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">256</span>, <span class="dv">64</span>),</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">64</span>, n_classes)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.layers(x)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This metaclass approach requires a significant amount of boilerplate code to train the models. However, for brevity sake, I’ll just load the pre-trained models and use them for prediction. The omitted code can be found in the <code>Stacking.ipynb</code> file in the repository.</p>
+<div id="78cd4bb7" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Load pre-trained models</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># model 1: meta class predictor</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>meta_model <span class="op">=</span> CIFAR10Classifier(<span class="dv">3</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>meta_model.load_state_dict(torch.load(<span class="st">'models2/model_meta.pth'</span>, weights_only<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># model 2: vehicle predictor</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>submodel_1 <span class="op">=</span> CIFAR10Classifier(<span class="dv">5</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>submodel_1.load_state_dict(torch.load(<span class="st">'models2/model_meta_class_0.pth'</span>, weights_only<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># model 3: general animal predictor</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>submodel_2<span class="op">=</span> CIFAR10Classifier(<span class="dv">5</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>submodel_2.load_state_dict(torch.load(<span class="st">'models2/model_meta_class_1.pth'</span>, weights_only<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># model 3: cat-dog predictor</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>submodel_3<span class="op">=</span> CIFAR10Classifier(<span class="dv">3</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>submodel_3.load_state_dict(torch.load(<span class="st">'models2/model_meta_class_2.pth'</span>, weights_only<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co"># model 5: catch-all predictor</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>catchall_model <span class="op">=</span> CIFAR10Classifier(<span class="dv">10</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>catchall_model.load_state_dict(torch.load(<span class="st">'models2/model_general.pth'</span>, weights_only<span class="op">=</span><span class="va">False</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="62">
+<pre><code>&lt;All keys matched successfully&gt;</code></pre>
+</div>
+</div>
+<p>Then, we can use the following function to predict the class of an image using the ensemble of models. The arguments of the functions go as follows:</p>
+<ul>
+<li><code>meta_model</code>: the meta-classifier model</li>
+<li><code>sub_models</code>: a list containitng the sub-classifier models</li>
+<li><code>general_model</code>: the general catch all classifier model</li>
+<li><code>input_images</code>: the input images</li>
+<li><code>sub_prediction_maps</code>: mapping between sub-classifier labels and general class labels packed into a list of dictionaries: one for each of the submodels.</li>
+</ul>
+<div id="da6267a7" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> stacked_predictions(meta_model, </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                        sub_models, </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                        general_model, </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                        input_images, </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                        sub_prediction_maps):</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># validate input</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">len</span>(sub_models) <span class="op">==</span> <span class="bu">len</span>(sub_prediction_maps)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># eval mode</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    meta_model.<span class="bu">eval</span>()</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    general_model.<span class="bu">eval</span>()</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> submodel <span class="kw">in</span> sub_models:</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        submodel.<span class="bu">eval</span>()</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># predictions</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># predict metaclass</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        meta_features <span class="op">=</span> meta_model(input_images).argmax(dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        predictions <span class="op">=</span> torch.zeros_like(meta_features)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># predict subclasses</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k, submodel <span class="kw">in</span> <span class="bu">enumerate</span>(sub_models):</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>            <span class="co"># predict the classes for the observations predicted to belong to this metaclass</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> meta_features <span class="op">==</span> k</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>            sub_prediction <span class="op">=</span> submodel(input_images[mask]).argmax(dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>            <span class="co"># map the predictions to the general class labels</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>            <span class="co"># use -1 to indicate that the metaclass prediction was predicted to be incorrect</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>            prediction_map <span class="op">=</span> sub_prediction_maps[k]</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>            temp <span class="op">=</span> [prediction_map.get(pred.item(), <span class="op">-</span><span class="dv">1</span>) <span class="cf">for</span> pred <span class="kw">in</span> sub_prediction]</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>            predictions[mask] <span class="op">=</span> torch.tensor(temp)</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># correct incorrect metaclass predictions</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># report the amount of incorrect predictions</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>        incorrect_mask <span class="op">=</span> predictions <span class="op">==</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Incorrect predictions: </span><span class="sc">{</span>incorrect_mask<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>        predictions[incorrect_mask] <span class="op">=</span> general_model(input_images[incorrect_mask]).argmax(dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return final predictions     </span></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> predictions</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we can compare the performance of the ensemble model vs the general model:</p>
+<div id="57b91583" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Confusion Matrix for the ensemble model</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># predict</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> stacked_predictions(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    meta_model<span class="op">=</span>meta_model, </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    sub_models<span class="op">=</span>[submodel_1, submodel_2, submodel_3], general_model<span class="op">=</span>catchall_model, </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    input_images<span class="op">=</span>X_test, </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    sub_prediction_maps<span class="op">=</span>[</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        {<span class="dv">1</span>:<span class="dv">0</span>, <span class="dv">2</span>:<span class="dv">1</span>, <span class="dv">3</span>:<span class="dv">8</span>, <span class="dv">4</span>:<span class="dv">9</span>},</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        {<span class="dv">1</span>:<span class="dv">2</span>, <span class="dv">2</span>:<span class="dv">4</span>, <span class="dv">3</span>:<span class="dv">6</span>, <span class="dv">4</span>:<span class="dv">7</span>},</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        {<span class="dv">1</span>:<span class="dv">3</span>, <span class="dv">2</span>:<span class="dv">5</span>}, </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># display confusion matrix</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>classes <span class="op">=</span> (<span class="st">'plane'</span>, <span class="st">'car'</span>, <span class="st">'bird'</span>, <span class="st">'cat'</span>, <span class="st">'deer'</span>, <span class="st">'dog'</span>, <span class="st">'frog'</span>, <span class="st">'horse'</span>, <span class="st">'ship'</span>, <span class="st">'truck'</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> ConfusionMatrixDisplay(confusion_matrix<span class="op">=</span>cm, display_labels<span class="op">=</span>classes)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>disp.plot(cmap<span class="op">=</span>plt.cm.Blues, </span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>          text_kw<span class="op">=</span>{<span class="st">'fontsize'</span>: <span class="dv">8</span>, <span class="st">'ha'</span>: <span class="st">'center'</span>, <span class="st">'va'</span>: <span class="st">'center'</span>})</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Format numbers as integers without scientific notation</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> text <span class="kw">in</span> disp.text_.ravel():</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    text.set_text(<span class="ss">f'</span><span class="sc">{</span><span class="bu">int</span>(<span class="bu">float</span>(text.get_text()))<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Confusion Matrix for Stacking Model'</span>)</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co"># compute accuracy</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>accuracy <span class="op">=</span> accuracy_score(y_test, y_pred)</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Accuracy: </span><span class="sc">{</span>accuracy<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Incorrect predictions: 648
+Accuracy: 0.6734</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ensemble_files/figure-html/cell-11-output-2.png" class="quarto-figure quarto-figure-center figure-img" width="533" height="449"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="f644b371" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Confusion Matrix for the ensemble model</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># predict</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> catchall_model(X_test).argmax(dim<span class="op">=</span><span class="dv">1</span>).detach()</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># display confusion matrix</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_pred)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>classes <span class="op">=</span> (<span class="st">'plane'</span>, <span class="st">'car'</span>, <span class="st">'bird'</span>, <span class="st">'cat'</span>, <span class="st">'deer'</span>, <span class="st">'dog'</span>, <span class="st">'frog'</span>, <span class="st">'horse'</span>, <span class="st">'ship'</span>, <span class="st">'truck'</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>disp <span class="op">=</span> ConfusionMatrixDisplay(confusion_matrix<span class="op">=</span>cm, display_labels<span class="op">=</span>classes)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>disp.plot(cmap<span class="op">=</span>plt.cm.Blues, </span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>          text_kw<span class="op">=</span>{<span class="st">'fontsize'</span>: <span class="dv">8</span>, <span class="st">'ha'</span>: <span class="st">'center'</span>, <span class="st">'va'</span>: <span class="st">'center'</span>})</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Format numbers as integers without scientific notation</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> text <span class="kw">in</span> disp.text_.ravel():</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    text.set_text(<span class="ss">f'</span><span class="sc">{</span><span class="bu">int</span>(<span class="bu">float</span>(text.get_text()))<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Confusion Matrix for single CNN Model'</span>)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co"># compute accuracy</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>accuracy <span class="op">=</span> accuracy_score(y_test, y_pred)</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Accuracy: </span><span class="sc">{</span>accuracy<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ensemble_files/figure-html/cell-12-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="533" height="449"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy: 0.6404</code></pre>
+</div>
+</div>
+<p>As we can observer, the stacked model slightly outperforms the single CNN model. However, this is not always the case, it varied depending on the number of epochs. This is a nitpicked example to show that Stacking models <em>can</em> outperform single models.</p>
+<hr>
+<p>Ensemble models is a different paradigm form the ones we have seen so far. It is a way to combine multiple models to create a single model that is more robust and accurate than any of the individual models.</p>
 </section>
 </section>
 
