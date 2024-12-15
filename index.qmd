@@ -19,7 +19,7 @@ This is a collection of the knowledge I have accumulated accumulated over an ind
 2. [How to train Neural Networks - Optimization](chapter%202/Training.html)
 3. [Good practices for Neural Networks](chapter%202/GoodPractices.html)
 4. [Convolutional Neural Networks](chapter%202/ConvolutionalNN.html)
-5. [Autoencoders](chapter%202/Autoencoders.html)
+5. [Autoencoders](chapter%202/AutoEncoders.html)
 6. ~~Recurrent Neural Networks and Beyond~~
 
 ### Chapter 3 - Other Machine Learning Topics
