@@ -53,7 +53,7 @@ Entropy is also used to measure diversity in the context of biology and ecolofy,
 However, **Information Gain** is preferred over entropy in practical applications. Both the GINI Index and Entropy give us absolute measures, but in the context of decision trees, we have a previous state we’d like to compare against. Information gain is a relative measure that achieves this. Information Gain is analogous to “Lost Surprise”. Since Entropy is also analogous to surprise, the formula is as follows:
 
 $$
-\operatorname{Information Gain} = H(Parent Node) - dfrac{1}{2} \left( H(Left Child) + H(Right Child) \right)
+\operatorname{Information Gain} = H(Parent Node) - \dfrac{1}{2} \left( H(Left Child) + H(Right Child) \right)
 $$
 
 ### Evaluating Questions for Nodes

@@ -171,7 +171,7 @@ window.Quarto = {
 <p>Entropy is also used to measure diversity in the context of biology and ecolofy, often referred to as the <strong>Shannon Diversity Index</strong>. It was originally derived for information theory where by using <span class="math inline">\(\log_2\)</span> it represents the expected number of questions needed to reach a pure node. In practice, for decicion trees, entropy is normalized to [0,1] using <span class="math inline">\(\log_k\)</span> for interpretability and comparability with the Gini index.</p>
 <p>However, <strong>Information Gain</strong> is preferred over entropy in practical applications. Both the GINI Index and Entropy give us absolute measures, but in the context of decision trees, we have a previous state we’d like to compare against. Information gain is a relative measure that achieves this. Information Gain is analogous to “Lost Surprise”. Since Entropy is also analogous to surprise, the formula is as follows:</p>
 <p><span class="math display">\[
-\operatorname{Information Gain} = H(Parent Node) - dfrac{1}{2} \left( H(Left Child) + H(Right Child) \right)
+\operatorname{Information Gain} = H(Parent Node) - \dfrac{1}{2} \left( H(Left Child) + H(Right Child) \right)
 \]</span></p>
 </section>
 </section>
@@ -403,7 +403,7 @@ window.Quarto = {
 <section id="not-pytorch" class="level2">
 <h2 class="anchored" data-anchor-id="not-pytorch">Not PyTorch</h2>
 <p>The SciKit-Learn library in Python provides a comprehensive implementation of decision trees. For this showcase we’ll fit a classification tree to the breast cancer dataset.</p>
-<div id="517f4501" class="cell" data-execution_count="1">
+<div id="0dac938c" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Libraries and data</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -422,12 +422,12 @@ window.Quarto = {
 </details>
 </div>
 <p>We can fit the model using the following code:</p>
-<div id="99fdd6bc" class="cell" data-results="hide" data-execution_count="2">
+<div id="3b567921" class="cell" data-results="hide" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>decision_tree <span class="op">=</span> DecisionTreeClassifier()</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>decision_tree.fit(X_train, y_train)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Fortunately, the SciKit-Learn library handles most of the details for us. We can visualize the tree using the <code>plot_tree</code> function:</p>
-<div id="3d5200f0" class="cell" data-execution_count="3">
+<div id="05d9cace" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>plot_tree(decision_tree, filled<span class="op">=</span><span class="va">True</span>, feature_names<span class="op">=</span>breast_cancer.feature_names)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -439,7 +439,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Blue nodes represent observations that are classified as benign, while orange nodes represent observations that are classified as malignant. The more intense a node is colored, the purer it is. However, the tree is so large that it is difficult to interpret. It is also very likely that it is overfit. So,let’s take a look at the train and test accuracies:</p>
-<div id="a87603fe" class="cell" data-execution_count="4">
+<div id="0f00fc22" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Train and test accuracy</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>train_accuracy <span class="op">=</span> accuracy_score(y_train, decision_tree.predict(X_train))</span>
@@ -454,11 +454,11 @@ Test accuracy: 0.9123</code></pre>
 </div>
 </div>
 <p>Yup, the train accuracy is 100% and the test accuracy is 91%. This is a classic example of overfitting. Let’s fit another tree with some regularization parameters and analyze the results.</p>
-<div id="4c383fb6" class="cell" data-results="hide" data-execution_count="5">
+<div id="d03fd8c2" class="cell" data-results="hide" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dt2 <span class="op">=</span> DecisionTreeClassifier(min_samples_leaf<span class="op">=</span><span class="dv">4</span>, min_samples_split<span class="op">=</span><span class="dv">10</span>, max_depth<span class="op">=</span><span class="dv">5</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>dt2.fit(X_train, y_train)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="2a51c048" class="cell" data-execution_count="6">
+<div id="b8be1926" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Tree plot and accuracy</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plot_tree(dt2, filled<span class="op">=</span><span class="va">True</span>, feature_names<span class="op">=</span>breast_cancer.feature_names)</span>
@@ -479,7 +479,7 @@ Test accuracy: 0.9123</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Train accuracy: 0.9780
-Test accuracy: 0.9649</code></pre>
+Test accuracy: 0.9474</code></pre>
 </div>
 </div>
 <p>The Train accuracy decreases to 97%, but the test accuracy jumps all the way to 96%. This is a good example of how regularization can help prevent overfitting.</p>
